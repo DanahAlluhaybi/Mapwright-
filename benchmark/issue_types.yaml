@@ -1,0 +1,192 @@
+# Issue taxonomy used by the benchmark manifests and the detectors.
+#
+# layer       mapping | structural | semantic
+# expected    who should be able to catch it: rules | llm | either
+#             (a hypothesis the evaluation tests, not an assumption it relies on)
+# unit        what one ground-truth instance is: column | row | cell
+# risk        auto   = safe to apply without review when confidently fixed
+#             review = a human must approve the fix
+
+version: 1
+
+issues:
+  # Mapping: the source shape differs from the target shape.
+  - id: M1
+    name: renamed_column
+    layer: mapping
+    expected: either
+    unit: column
+    risk: auto
+    example: "CUST_NM -> full_name, Cust Email -> email"
+
+  - id: M2
+    name: non_english_header
+    layer: mapping
+    expected: llm
+    unit: column
+    risk: auto
+    example: "اسم العميل -> full_name, ism_alamil -> full_name"
+
+  - id: M3
+    name: split_field
+    layer: mapping
+    expected: llm
+    unit: column
+    risk: auto
+    example: "first_name + last_name -> full_name"
+
+  - id: M4
+    name: merged_field
+    layer: mapping
+    expected: llm
+    unit: column
+    risk: review
+    example: "location = 'Jeddah, KSA' -> city + country_code"
+
+  - id: M5
+    name: irrelevant_column
+    layer: mapping
+    expected: either
+    unit: column
+    risk: auto
+    example: "legacy_row_hash, notes_internal -> dropped"
+
+  - id: M6
+    name: missing_target_column
+    layer: mapping
+    expected: either
+    unit: column
+    risk: review
+    example: "no source column for credit_limit"
+
+  # Structural: detectable from types, patterns, and constraints alone.
+  - id: S1
+    name: type_parse_failure
+    layer: structural
+    expected: rules
+    unit: cell
+    risk: auto
+    example: "credit_limit = '12,500.00', '12500 SAR'"
+
+  - id: S2
+    name: exact_duplicate_row
+    layer: structural
+    expected: rules
+    unit: row
+    risk: auto
+    example: "identical row exported twice"
+
+  - id: S3
+    name: required_value_missing
+    layer: structural
+    expected: rules
+    unit: cell
+    risk: review
+    example: "customer_type is empty"
+
+  - id: S4
+    name: whitespace_or_case_noise
+    layer: structural
+    expected: rules
+    unit: cell
+    risk: auto
+    example: "'  JOHN smith ', 'User@Mail.COM'"
+
+  - id: S5
+    name: out_of_range
+    layer: structural
+    expected: rules
+    unit: cell
+    risk: review
+    example: "credit_limit = -5000, signup_date = 1899-01-01"
+
+  - id: S6
+    name: invalid_format
+    layer: structural
+    expected: rules
+    unit: cell
+    risk: auto
+    example: "email without '@', phone with 6 digits"
+
+  - id: S7
+    name: orphan_foreign_key
+    layer: structural
+    expected: rules
+    unit: row
+    risk: review
+    example: "order references a customer_id that does not exist"
+
+  - id: S8
+    name: conflicting_key_duplicate
+    layer: structural
+    expected: rules
+    unit: row
+    risk: review
+    example: "same customer_id twice with different emails"
+
+  # Semantic: needs an understanding of what the values mean.
+  - id: V1
+    name: categorical_synonym
+    layer: semantic
+    expected: llm
+    unit: cell
+    risk: auto
+    example: "KSA, Saudi Arabia, Saudia, السعودية -> SA; جدة, JED -> Jeddah"
+
+  - id: V2
+    name: ambiguous_date_format
+    layer: semantic
+    expected: either
+    unit: column
+    risk: review
+    example: "03/04/2024 where the column mixes or hides day-first vs month-first"
+
+  - id: V3
+    name: disguised_missing
+    layer: semantic
+    expected: llm
+    unit: cell
+    risk: auto
+    example: "'N/A', '-', 'unknown', 'لا يوجد', '0000-00-00', 'test@test.com'"
+
+  - id: V4
+    name: embedded_unit_or_scale
+    layer: semantic
+    expected: llm
+    unit: cell
+    risk: review
+    example: "'1.2K', 'SAR 450', '٤٥٠ ريال'"
+
+  - id: V5
+    name: boolean_variant
+    layer: semantic
+    expected: either
+    unit: cell
+    risk: auto
+    example: "Y/N, Active/Inactive, نعم/لا, 1/0"
+
+  - id: V6
+    name: free_text_enum
+    layer: semantic
+    expected: llm
+    unit: cell
+    risk: auto
+    example: "'delivered to client', 'returned - damaged' -> DELIVERED, RETURNED"
+
+  - id: V7
+    name: misplaced_value
+    layer: semantic
+    expected: llm
+    unit: cell
+    risk: review
+    example: "phone number sitting in the email column"
+
+  # Stretch goal, only scored if time allows.
+  - id: V8
+    name: fuzzy_duplicate_entity
+    layer: semantic
+    expected: llm
+    unit: row
+    risk: review
+    stretch: true
+    example: "'Mohammed Al-Harbi' and 'Mohamed Alharbi' with the same phone"

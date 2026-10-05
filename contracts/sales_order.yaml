@@ -1,0 +1,60 @@
+# Target contract: sales order header.
+#
+# Orders reference customers through customer_id. During benchmarking the
+# customer side is a fixed, clean reference table (benchmark/reference_customers.csv),
+# so referential checks have a stable target.
+
+entity: sales_order
+version: 1
+description: >
+  One row per sales order header. Amounts are stored in the order's own
+  currency; no currency conversion happens during onboarding.
+primary_key: [order_id]
+
+fields:
+  - name: order_id
+    type: string
+    required: true
+    unique: true
+    pattern: '^[A-Z0-9-]{3,20}$'
+    canonical: Source identifier, trimmed and upper-cased.
+
+  - name: customer_id
+    type: string
+    required: true
+    foreign_key: customer.customer_id
+    canonical: Trimmed and upper-cased, must exist in the customer table.
+
+  - name: order_date
+    type: date
+    required: true
+    min: '2015-01-01'
+    max: '2026-12-31'
+    canonical: ISO 8601 date (YYYY-MM-DD). Any time component is dropped.
+
+  - name: currency
+    type: string
+    required: true
+    allowed_values: [SAR, AED, KWD, BHD, QAR, OMR, USD, EUR]
+    canonical: ISO 4217 code.
+
+  - name: amount
+    type: decimal
+    precision: 12
+    scale: 2
+    required: true
+    min: 0
+    max: 10000000
+    canonical: >
+      Plain decimal in the order currency, two places. Currency symbols,
+      thousands separators, and suffixes such as "K" are removed and applied.
+
+  - name: status
+    type: string
+    required: true
+    allowed_values: [PENDING, SHIPPED, DELIVERED, CANCELLED, RETURNED]
+
+  - name: channel
+    type: string
+    required: true
+    allowed_values: [ONLINE, STORE, PHONE, PARTNER]

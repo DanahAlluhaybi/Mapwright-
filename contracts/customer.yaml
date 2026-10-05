@@ -1,0 +1,82 @@
+# Target contract: customer master data.
+#
+# Every value in a ground-truth file is written in the canonical form
+# described here, so scoring can compare cells exactly.
+
+entity: customer
+version: 1
+description: >
+  Customer master record as loaded into the target system. One row per
+  customer. Source exports may name, split, encode, or format these fields
+  differently; the onboarding pipeline maps them onto this shape.
+primary_key: [customer_id]
+
+fields:
+  - name: customer_id
+    type: string
+    required: true
+    unique: true
+    pattern: '^[A-Z0-9-]{3,20}$'
+    canonical: Source identifier, trimmed and upper-cased. Never re-generated.
+
+  - name: full_name
+    type: string
+    required: true
+    max_length: 120
+    canonical: >
+      Single space between parts, no leading or trailing spaces, original
+      script preserved (Arabic names stay Arabic). Title case for Latin script.
+
+  - name: email
+    type: string
+    required: false
+    pattern: '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
+    canonical: Lower-cased and trimmed. Null when missing or invalid.
+
+  - name: phone
+    type: string
+    required: false
+    pattern: '^\+[1-9][0-9]{7,14}$'
+    canonical: >
+      E.164 with no spaces, for example +966501234567. Local Saudi mobile
+      formats (05XXXXXXXX, 5XXXXXXXX, 9665XXXXXXXX, 00966...) normalize to
+      +9665XXXXXXXX.
+
+  - name: country_code
+    type: string
+    required: true
+    allowed_values: [SA, AE, KW, BH, QA, OM, EG, JO, US, GB, IN, PK]
+    canonical: ISO 3166-1 alpha-2.
+
+  - name: city
+    type: string
+    required: false
+    reference: reference/cities.csv
+    canonical: English city name exactly as listed in the reference file.
+
+  - name: customer_type
+    type: string
+    required: true
+    allowed_values: [INDIVIDUAL, BUSINESS]
+
+  - name: signup_date
+    type: date
+    required: true
+    min: '2000-01-01'
+    max: '2026-12-31'
+    canonical: ISO 8601 date (YYYY-MM-DD).
+
+  - name: credit_limit
+    type: decimal
+    precision: 12
+    scale: 2
+    required: false
+    min: 0
+    max: 1000000
+    unit: SAR
+    canonical: Plain decimal in SAR, two places, no separators or symbols.
+
+  - name: is_active
+    type: boolean
+    required: true
+    canonical: true or false.
