@@ -68,8 +68,12 @@ Matching details:
 
 ### 3. Transformation correctness
 
-Output rows are aligned to ground-truth rows by primary key, using
-`row_lineage` from the manifest.
+Output rows are aligned to ground-truth rows through `_source_row`, the
+source row each output row came from, and the manifest's `row_lineage`.
+Aligning by source row rather than by primary key means one badly
+normalized key does not make every other cell in that row count as wrong.
+A second output row aligned to the same ground-truth row counts as
+spurious.
 
 - **Dirty-cell accuracy** (headline metric): among cells where the source
   value differs from the ground truth, the share the output gets exactly
@@ -99,8 +103,14 @@ Cells are compared in canonical form: strings exactly, decimals within
   that looks valid and is wrong. Contract pass rate minus correctness is
   exactly the gap this metric shows.
 - **Fabrication rate**: output cells that are filled in where the ground
-  truth is null, as a share of ground-truth nulls. This counts values the
-  system invented.
+  truth is null and the value is not simply the source text carried over,
+  as a share of ground-truth nulls. This counts values the system
+  invented. A placeholder like `N/A` left in place is wrong, but it is not
+  invented.
+
+The ground truth itself does not pass every contract check: unrecoverable
+cells are null in required fields, because the correct output there is a
+gap for a human to fill, not a guess.
 
 ### 5. Execution and repair
 
@@ -121,9 +131,13 @@ The ground-truth manifest marks each issue `auto` or `review`.
   escalated actions. Low precision means the reviewer is flooded.
 - **Escalation recall**: `review` issues covered by an escalated action /
   all `review` issues.
-- **Missed reviews** (count): `review` issues that were applied
-  automatically. Reported per case; every one is listed in the failure
+- **Missed reviews** (count): `review` issues not covered by any
+  escalation. Reported per case; every one is listed in the failure
   analysis.
+
+An escalation covers an issue when it names the same target field and
+either lists the issue's row or covers the whole column. Duplicate groups
+are covered by naming the group or any of its rows.
 
 Approval is scored two ways:
 
@@ -154,11 +168,63 @@ free tier). Rules-only is the zero-cost reference.
 - The scorer is deterministic and has its own unit tests, written against
   hand-computed expected values.
 
+## Run output format
+
+Every system writes the same files, so all of them are scored by the same
+code:
+
+```
+runs/<run-id>/
+  run.json              {"system": "...", "model": "...", "date": "..."}
+  D01/
+    target.csv          _source_row plus every contract field, canonical text
+    result.json
+```
+
+`result.json`:
+
+```json
+{
+  "mapping": [{"source": ["CUST_NM"], "target": "full_name"}],
+  "dropped_columns": ["ROW_HASH"],
+  "detections": [
+    {"issue": "V1", "target": "country_code", "rows": [3, 9]},
+    {"issue": "V2", "target": "signup_date"},
+    {"issue": "M5", "columns": ["ROW_HASH"]},
+    {"issue": "S2", "groups": [[12, 13]]}
+  ],
+  "actions": [
+    {"id": "a1", "type": "map_values", "origin": "llm", "valid": true,
+     "executed": true, "succeeded": true, "revisions": 0, "status": "applied"}
+  ],
+  "escalations": [
+    {"action": "a4", "target": "signup_date"},
+    {"target": "customer_type", "rows": [41]}
+  ],
+  "usage": {"llm_calls": 4, "input_tokens": 9100, "output_tokens": 1200, "seconds": 6.2}
+}
+```
+
+An escalation without `rows` covers the whole column. Action `status` is
+one of `applied`, `escalated`, `rejected`, `invalid` or `failed`.
+
+Two reference systems bracket every result: `perfect` outputs the ground
+truth and reports exactly the manifest's issues, and `passthrough` copies
+columns whose headers already match and changes nothing. A test requires
+`perfect` to score perfectly on every case, which is how the scorer itself
+is checked.
+
 ## Report
 
-`mapwright bench` produces `results/<run-id>/`:
+```
+python -m evaluation baseline perfect runs/perfect   # write a reference system's run
+python -m evaluation score runs/<run-id>             # score it
+python -m evaluation compare results/a results/b     # systems side by side
+```
 
-- `scores.json`: every metric, per case, per system
+Scoring writes `results/<run-id>/`:
+
+- `scores.json`: every metric, per case, plus the per-split summary
 - `summary.md`: the headline tables below
 - `failures.md`: every missed review, fabrication and silent error, with
   the source value, output value and ground truth

@@ -29,8 +29,8 @@ cases with exact ground truth, held-out cases frozen.
 | Benchmark and evaluation design (`docs/`) | Done |
 | Benchmark generator, 11 cases, held-out set frozen | Done |
 | H04 from a real public dataset | |
-| Scorer, with its own tests | Next |
-| Rules-only baseline | |
+| Scorer, with its own tests and reference systems | Done |
+| Rules-only baseline | Next |
 | LLM semantic layer and repair loop | |
 | Comparison: rules vs LLM vs hybrid, failure analysis | |
 | Review UI and migration package | |
@@ -47,6 +47,8 @@ pip install -e ".[dev]"
 
 pytest                                     # run the tests
 python -m benchmark.generator verify       # check the benchmark files are intact
+python -m evaluation baseline perfect runs/perfect
+python -m evaluation score runs/perfect    # every metric at its best value
 ```
 
 ## Documents
