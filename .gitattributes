@@ -1,0 +1,4 @@
+# Benchmark files are hashed; keep their bytes exactly as generated.
+benchmark/datasets/** -text
+benchmark/reference_customers.csv -text
+benchmark/FROZEN -text

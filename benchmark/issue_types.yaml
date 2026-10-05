@@ -124,6 +124,14 @@ issues:
     risk: review
     example: "same customer_id twice with different emails"
 
+  - id: S9
+    name: noncanonical_format
+    layer: structural
+    expected: rules
+    unit: cell
+    risk: auto
+    example: "phone 0501234567 instead of +966501234567, date 2024/03/05 or 05-Mar-2024"
+
   # Semantic: needs an understanding of what the values mean.
   - id: V1
     name: categorical_synonym

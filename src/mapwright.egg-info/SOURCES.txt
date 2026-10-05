@@ -1,0 +1,12 @@
+README.md
+pyproject.toml
+src/mapwright/__init__.py
+src/mapwright/canonical.py
+src/mapwright/contracts.py
+src/mapwright.egg-info/PKG-INFO
+src/mapwright.egg-info/SOURCES.txt
+src/mapwright.egg-info/dependency_links.txt
+src/mapwright.egg-info/requires.txt
+src/mapwright.egg-info/top_level.txt
+tests/test_benchmark.py
+tests/test_contracts.py

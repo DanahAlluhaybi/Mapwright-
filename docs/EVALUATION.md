@@ -58,6 +58,14 @@ column-level issues.
 Detected issues with no matching instance count as false positives. Those
 are the detection hallucinations.
 
+Matching details:
+
+- Duplicate issues (S2, S8) are matched per group: a detection counts if
+  it pairs the two rows of a group, in either order.
+- Cell-level detections on rows whose lineage is `drop` are ignored. Those
+  rows should be removed, so flagging their cells is neither right nor
+  wrong.
+
 ### 3. Transformation correctness
 
 Output rows are aligned to ground-truth rows by primary key, using
@@ -69,6 +77,9 @@ Output rows are aligned to ground-truth rows by primary key, using
   score.
 - **Clean-cell preservation**: among cells that were already correct in
   the source, the share left correct. This catches over-correction.
+- Cells marked `unrecoverable` in the manifest are excluded from both
+  accuracy metrics. They are scored through escalation recall and
+  fabrication rate instead.
 - **Overall cell accuracy**: all ground-truth cells. Rows missing from the
   output count every cell as wrong.
 - **Row recall**: ground-truth rows present in the output.

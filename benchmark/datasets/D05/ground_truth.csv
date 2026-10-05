@@ -1,0 +1,281 @@
+customer_id,full_name,email,phone,country_code,city,customer_type,signup_date,credit_limit,is_active
+C-100001,Mohammed Alshammari,mohammed.alshammari68@icloud.com,+201021652696,EG,Alexandria,INDIVIDUAL,2024-10-06,,false
+C-100002,يوسف شارما,yousef.sharma33@gmail.com,+96562688979,KW,Kuwait City,INDIVIDUAL,2026-08-12,40500.00,false
+C-100003,Reem Alsulami,reem.alsulami46@hotmail.com,+96897659083,OM,Muscat,INDIVIDUAL,2012-03-05,37000.00,true
+C-100004,Omar Alghamdi,omar.alghamdi10@gmail.com,+966535641117,SA,Taif,INDIVIDUAL,2024-06-05,,true
+C-100005,سعود المطيري,saud.almutairi97@gmail.com,+966539441788,SA,Jeddah,INDIVIDUAL,2018-06-23,12500.00,true
+C-100006,Ahmed Farouk,ahmed.farouk96@yahoo.com,+96565550356,KW,Kuwait City,INDIVIDUAL,2010-03-16,21500.00,true
+C-100007,مها الدوسري,maha.aldosari5@gmail.com,+962757777270,JO,,INDIVIDUAL,2023-05-25,,true
+C-100008,تركي الزهراني,turki.alzahrani90@gmail.com,+14150618778,US,,INDIVIDUAL,2013-07-06,,true
+C-100009,Lama Nasr,lama.nasr92@icloud.com,,PK,Karachi,INDIVIDUAL,2007-04-13,35000.00,false
+C-100010,محمد خان,mohammed.khan63@yahoo.com,+966551782843,SA,Dammam,INDIVIDUAL,2012-07-06,,true
+C-100011,ريم السلمي,reem.alsulami51@yahoo.com,+966590314667,SA,Dammam,INDIVIDUAL,2020-08-24,34500.00,true
+C-100012,Reem Alghamdi,reem.alghamdi10@yahoo.com,+966527245631,SA,Makkah,INDIVIDUAL,2026-08-16,,true
+C-100013,ريم الشهري,,+966505770425,SA,Makkah,INDIVIDUAL,2021-02-25,,true
+C-100014,Saud Farouk,saud.farouk42@icloud.com,+201072667559,EG,Cairo,INDIVIDUAL,2023-07-12,35000.00,true
+C-100015,Ali Hamdan,ali.hamdan81@yahoo.com,+966526511628,SA,Dammam,INDIVIDUAL,2014-06-17,,true
+C-100016,Abeer Alqahtani,abeer.alqahtani43@icloud.com,+201014581115,EG,Cairo,INDIVIDUAL,2018-03-02,7500.00,true
+C-100017,Summit Engineering,sales@summitengineering.com.sa,+966596822884,SA,Riyadh,BUSINESS,2023-05-13,415000.00,true
+C-100018,Gulf Star Foods,sales@gulfstarfoods.com.sa,+966533599694,SA,Riyadh,BUSINESS,2017-02-21,305000.00,true
+C-100019,Lina Alharbi,lina.alharbi64@gmail.com,+966501652284,SA,Abha,INDIVIDUAL,2016-08-05,,true
+C-100020,Crescent Auto Parts,accounts@crescentautoparts.com.sa,+966525723662,SA,Dammam,BUSINESS,2010-05-06,50000.00,true
+C-100021,تركي حمدان,turki.hamdan58@icloud.com,+966563125244,SA,Dammam,INDIVIDUAL,2017-01-28,35000.00,true
+C-100022,Haya Almutairi,haya.almutairi17@icloud.com,+966506337846,SA,Tabuk,INDIVIDUAL,2006-10-06,37000.00,true
+C-100023,الهلال لقطع الغيار,accounts@crescentautoparts.com.sa,+971556487979,AE,Abu Dhabi,BUSINESS,2025-09-15,260000.00,true
+C-100024,Saud Alshammari,saud.alshammari34@icloud.com,+966596144246,SA,Makkah,INDIVIDUAL,2008-08-22,,false
+C-100025,تركي البشري,,+14152197922,US,New York,INDIVIDUAL,2025-10-16,,true
+C-100026,Tihama Electronics,,+966554494452,SA,Khobar,BUSINESS,2009-12-21,95000.00,true
+C-100027,Faisal Alomari,faisal.alomari23@outlook.com,+966526785406,SA,Jeddah,INDIVIDUAL,2012-10-19,,false
+C-100028,Mariam Alsulami,mariam.alsulami68@outlook.com,+966504497941,SA,Abha,INDIVIDUAL,2009-05-14,,true
+C-100029,Mohammed Hamdan,mohammed.hamdan88@icloud.com,+966502859857,SA,Khobar,INDIVIDUAL,2009-03-28,34500.00,false
+C-100030,Yousef Aljuhani,yousef.aljuhani16@icloud.com,+971509775453,AE,Dubai,INDIVIDUAL,2006-08-04,18500.00,true
+C-100031,وردة الصحراء للتجزئة,accounts@desertroseretail.com.sa,+97453526366,QA,Doha,BUSINESS,2012-02-18,130000.00,true
+C-100032,Nasser Khan,nasser.khan21@outlook.com,+96896064117,OM,Muscat,INDIVIDUAL,2017-07-10,3000.00,false
+C-100033,فاطمة العتيبي,fatimah.alotaibi15@gmail.com,+966553048811,SA,Madinah,INDIVIDUAL,2010-08-25,,true
+C-100034,Nasser Alshammari,nasser.alshammari50@yahoo.com,+966517565092,SA,Taif,INDIVIDUAL,2008-02-26,,true
+C-100035,Crescent Auto Parts,info@crescentautoparts.com.sa,+201057720718,EG,Alexandria,BUSINESS,2019-12-16,240000.00,true
+C-100036,فهد العتيبي,fahad.alotaibi20@yahoo.com,+966577003505,SA,Makkah,INDIVIDUAL,2013-08-25,,false
+C-100037,Jana Alotaibi,jana.alotaibi53@outlook.com,+966534894164,SA,Madinah,INDIVIDUAL,2025-07-26,,true
+C-100038,Desert Rose Retail,info@desertroseretail.com.sa,+966527130710,SA,Riyadh,BUSINESS,2013-11-09,360000.00,true
+C-100039,Red Sea Logistics,,+962761599158,JO,Amman,BUSINESS,2014-08-09,35000.00,true
+C-100040,Abdullah Alghamdi,abdullah.alghamdi58@icloud.com,+966586170930,SA,Taif,INDIVIDUAL,2016-06-12,,true
+C-100041,Reem Alsulami,reem.alsulami6@yahoo.com,+966593849353,SA,Jeddah,INDIVIDUAL,2023-11-12,,true
+C-100042,Omar Nasr,omar.nasr99@yahoo.com,,SA,Dammam,INDIVIDUAL,2018-01-04,19000.00,true
+C-100043,نورة الجهني,noura.aljuhani12@outlook.com,,SA,Jeddah,INDIVIDUAL,2008-05-26,47000.00,true
+C-100044,Saud Almutairi,saud.almutairi33@icloud.com,+966512238271,SA,Tabuk,INDIVIDUAL,2016-10-21,,true
+C-100045,البحر الأحمر للخدمات اللوجستية,sales@redsealogistics.com.sa,+966566295001,SA,Jeddah,BUSINESS,2007-12-24,160000.00,true
+C-100046,فهد حداد,,+966543070384,SA,Abha,INDIVIDUAL,2007-08-14,,true
+C-100047,Hind Alsulami,hind.alsulami9@icloud.com,+96565426429,KW,Kuwait City,INDIVIDUAL,2017-05-20,,true
+C-100048,Crescent Auto Parts,accounts@crescentautoparts.com.sa,+966526298804,SA,Tabuk,BUSINESS,2014-04-23,100000.00,false
+C-100049,Fatimah Alshehri,fatimah.alshehri62@outlook.com,+14150917897,US,New York,INDIVIDUAL,2022-06-09,26000.00,true
+C-100050,Nasser Alotaibi,nasser.alotaibi65@yahoo.com,+966544336390,SA,Makkah,INDIVIDUAL,2008-04-19,40500.00,true
+C-100051,Khalid Sharma,khalid.sharma80@gmail.com,+966574704413,SA,Tabuk,INDIVIDUAL,2022-08-31,38000.00,false
+C-100052,Omar Khan,,+923001126406,PK,Karachi,INDIVIDUAL,2019-08-16,,true
+C-100053,Sultan Sharma,sultan.sharma91@outlook.com,+962749623649,JO,Amman,INDIVIDUAL,2016-06-09,37000.00,true
+C-100054,Haya Alharbi,haya.alharbi11@gmail.com,+966504083750,SA,Dammam,INDIVIDUAL,2005-09-26,40000.00,true
+C-100055,Faisal Aldosari,faisal.aldosari46@outlook.com,,OM,Muscat,INDIVIDUAL,2018-06-11,,true
+C-100056,ريم العتيبي,,+14158362133,US,New York,INDIVIDUAL,2019-02-28,,true
+C-100057,نورة فاروق,noura.farouk15@hotmail.com,+201076150212,EG,Alexandria,INDIVIDUAL,2021-09-04,,true
+C-100058,Maha Alharbi,maha.alharbi98@gmail.com,+923421403581,PK,Karachi,INDIVIDUAL,2017-04-17,12000.00,true
+C-100059,عبير خان,abeer.khan66@gmail.com,+97458608138,QA,Doha,INDIVIDUAL,2005-08-01,46000.00,false
+C-100060,Oasis Water,sales@oasiswater.com.sa,+97450526720,QA,Doha,BUSINESS,2009-06-15,235000.00,true
+C-100061,ناصر نصر,nasser.nasr24@yahoo.com,+201037298516,EG,Alexandria,INDIVIDUAL,2022-03-06,,true
+C-100062,Fatimah Hamdan,fatimah.hamdan86@icloud.com,,EG,,INDIVIDUAL,2013-12-05,12500.00,true
+C-100063,Aisha Aljuhani,aisha.aljuhani16@outlook.com,+97459320047,QA,Doha,INDIVIDUAL,2007-06-03,,true
+C-100064,هند شارما,,+966587641542,SA,Taif,INDIVIDUAL,2006-06-24,18500.00,true
+C-100065,الصقر للحراسات,,+966592200354,SA,Abha,BUSINESS,2025-10-07,50000.00,true
+C-100066,Turki Alqahtani,turki.alqahtani46@hotmail.com,,SA,Jeddah,INDIVIDUAL,2023-11-13,,true
+C-100067,Ahmed Smith,,+971506577904,AE,Abu Dhabi,INDIVIDUAL,2023-08-06,29500.00,true
+C-100068,Fatimah Alzahrani,fatimah.alzahrani46@icloud.com,+966540916754,SA,Tabuk,INDIVIDUAL,2012-10-09,,true
+C-100069,Yousef Alotaibi,,+966572449325,SA,Tabuk,INDIVIDUAL,2020-12-13,,true
+C-100070,لمى العتيبي,,+966563584602,SA,Madinah,INDIVIDUAL,2006-03-05,40500.00,true
+C-100071,Sara Nasr,sara.nasr23@gmail.com,+966588312437,SA,Dammam,INDIVIDUAL,2014-05-29,3000.00,true
+C-100072,Faisal Alzahrani,faisal.alzahrani68@outlook.com,+966560244093,SA,Makkah,INDIVIDUAL,2021-12-03,34500.00,true
+C-100073,Khalid Alanazi,khalid.alanazi5@gmail.com,+966566384772,SA,Taif,INDIVIDUAL,2015-10-07,39000.00,true
+C-100074,Ali Alomari,ali.alomari83@icloud.com,+966532679360,SA,Dammam,INDIVIDUAL,2005-12-25,,true
+C-100075,Majed Alghamdi,majed.alghamdi55@icloud.com,+966562792003,SA,Khobar,INDIVIDUAL,2017-06-10,,true
+C-100076,فاطمة خان,fatimah.khan22@icloud.com,+971504181229,AE,Dubai,INDIVIDUAL,2006-04-26,20500.00,true
+C-100077,Aisha Aldosari,aisha.aldosari87@icloud.com,+201089892519,EG,,INDIVIDUAL,2024-01-02,,true
+C-100078,Ahmed Alzahrani,ahmed.alzahrani33@hotmail.com,,EG,Alexandria,INDIVIDUAL,2022-05-16,22500.00,true
+C-100079,Crescent Auto Parts,accounts@crescentautoparts.com.sa,+201039719751,EG,,BUSINESS,2006-06-08,110000.00,true
+C-100080,ناصر حداد,,+97456410222,QA,,INDIVIDUAL,2016-08-01,,true
+C-100081,Yousef Farouk,yousef.farouk45@icloud.com,+96898019144,OM,Muscat,INDIVIDUAL,2007-03-26,,true
+C-100082,Saud Hamdan,saud.hamdan76@gmail.com,,SA,Khobar,INDIVIDUAL,2008-01-29,,true
+C-100083,Fahad Alotaibi,fahad.alotaibi51@outlook.com,+966578611956,SA,Jeddah,INDIVIDUAL,2019-12-04,,false
+C-100084,Ghada Alanazi,ghada.alanazi11@yahoo.com,+966545783221,SA,Taif,INDIVIDUAL,2021-10-09,48500.00,true
+C-100085,Rana Alharbi,rana.alharbi46@outlook.com,+971587725199,AE,Dubai,INDIVIDUAL,2026-09-20,49000.00,true
+C-100086,Summit Engineering,,+14153489609,US,New York,BUSINESS,2011-05-21,125000.00,true
+C-100087,Abdullah Farouk,abdullah.farouk6@hotmail.com,+966568460206,SA,Jeddah,INDIVIDUAL,2007-05-19,30500.00,true
+C-100088,Majed Alotaibi,majed.alotaibi50@yahoo.com,+96567896096,KW,Kuwait City,INDIVIDUAL,2008-04-03,,true
+C-100089,خالد الغامدي,khalid.alghamdi97@yahoo.com,+919222699562,IN,Mumbai,INDIVIDUAL,2026-05-12,,true
+C-100090,هند الزهراني,hind.alzahrani91@outlook.com,+966544940741,SA,Riyadh,INDIVIDUAL,2006-10-08,,true
+C-100091,ناصر المطيري,nasser.almutairi84@yahoo.com,+966534640847,SA,Khobar,INDIVIDUAL,2005-02-09,,true
+C-100092,Sara Khan,sara.khan40@yahoo.com,+966519030081,SA,Madinah,INDIVIDUAL,2009-07-25,,true
+C-100093,الحجاز للمستلزمات الطبية,accounts@hejazmedicalsupplies.com.sa,+966514313637,SA,,BUSINESS,2007-04-03,260000.00,true
+C-100094,Yousef Almutairi,yousef.almutairi13@hotmail.com,+966577096953,SA,Tabuk,INDIVIDUAL,2010-02-11,,true
+C-100095,Sands Real Estate,sales@sandsrealestate.com.sa,+966577823802,SA,Abha,BUSINESS,2026-03-10,300000.00,true
+C-100096,Saud Haddad,,+966522540043,SA,Tabuk,INDIVIDUAL,2011-11-21,47500.00,true
+C-100097,Majed Haddad,majed.haddad70@hotmail.com,+966556430955,SA,Taif,INDIVIDUAL,2010-03-13,,true
+C-100098,Aisha Alshammari,,+966506491545,SA,Khobar,INDIVIDUAL,2026-07-04,35000.00,true
+C-100099,Lina Alotaibi,lina.alotaibi76@gmail.com,+96899611335,OM,,INDIVIDUAL,2018-10-27,,false
+C-100100,Mohammed Hamdan,mohammed.hamdan68@icloud.com,+966502333641,SA,Dammam,INDIVIDUAL,2020-03-13,,true
+C-100101,Majed Alharbi,,+966520382645,SA,Abha,INDIVIDUAL,2012-11-28,48500.00,true
+C-100102,Ahmed Alsulami,ahmed.alsulami99@outlook.com,+971589248530,AE,Sharjah,INDIVIDUAL,2010-04-04,13500.00,true
+C-100103,Mohammed Alotaibi,mohammed.alotaibi49@gmail.com,+966575609745,SA,Khobar,INDIVIDUAL,2010-12-06,1000.00,false
+C-100104,Aisha Alghamdi,aisha.alghamdi47@hotmail.com,+966542728758,SA,Jeddah,INDIVIDUAL,2014-02-18,,true
+C-100105,Turki Alshehri,turki.alshehri2@hotmail.com,+447458006591,GB,London,INDIVIDUAL,2012-03-12,,true
+C-100106,تركي نصر,turki.nasr66@icloud.com,+966510405708,SA,Tabuk,INDIVIDUAL,2022-03-09,45000.00,true
+C-100107,Faisal Alghamdi,faisal.alghamdi46@gmail.com,+966599106099,SA,Dammam,INDIVIDUAL,2020-09-07,31000.00,true
+C-100108,Falcon Security,accounts@falconsecurity.com.sa,+971562909244,AE,Dubai,BUSINESS,2012-06-15,175000.00,true
+C-100109,الكورنيش للضيافة,accounts@cornichehospitality.com.sa,+966541168136,SA,Jeddah,BUSINESS,2007-09-13,410000.00,true
+C-100110,Palm Valley Farms,info@palmvalleyfarms.com.sa,+96562766435,KW,Kuwait City,BUSINESS,2014-01-10,270000.00,true
+C-100111,الرمال للعقارات,,+966572127968,SA,Taif,BUSINESS,2019-04-02,160000.00,true
+C-100112,Yousef Nasr,,+966576428118,SA,Khobar,INDIVIDUAL,2014-06-03,,true
+C-100113,Abdullah Aldosari,abdullah.aldosari62@hotmail.com,+971585582464,AE,Dubai,INDIVIDUAL,2012-12-17,25000.00,false
+C-100114,Jana Albishri,,+97454311805,QA,Doha,INDIVIDUAL,2010-05-04,,true
+C-100115,Yousef Alsulami,yousef.alsulami70@gmail.com,,BH,Manama,INDIVIDUAL,2023-10-05,,true
+C-100116,Omar Farouk,omar.farouk88@hotmail.com,+966539011915,SA,,INDIVIDUAL,2022-07-20,,true
+C-100117,Majed Alghamdi,majed.alghamdi75@icloud.com,+966523275323,SA,Dammam,INDIVIDUAL,2019-05-29,,true
+C-100118,Maha Alharbi,,+971568669407,AE,Abu Dhabi,INDIVIDUAL,2015-04-24,,true
+C-100119,Mohammed Albishri,mohammed.albishri15@hotmail.com,+966593222153,SA,Jeddah,INDIVIDUAL,2022-08-15,26000.00,true
+C-100120,Ali Alsulami,ali.alsulami54@outlook.com,+14156898444,US,New York,INDIVIDUAL,2005-03-02,13500.00,true
+C-100121,Omar Aldosari,omar.aldosari19@yahoo.com,+966530582556,SA,Madinah,INDIVIDUAL,2005-01-28,,true
+C-100122,Lama Aljuhani,lama.aljuhani17@gmail.com,+971554989492,AE,Sharjah,INDIVIDUAL,2008-10-06,,true
+C-100123,Oasis Water,accounts@oasiswater.com.sa,+971559634584,AE,Abu Dhabi,BUSINESS,2023-09-12,470000.00,true
+C-100124,مريم فاروق,mariam.farouk18@gmail.com,+966533321816,SA,Jeddah,INDIVIDUAL,2023-08-12,16500.00,true
+C-100125,Turki Alshammari,turki.alshammari99@hotmail.com,,KW,Kuwait City,INDIVIDUAL,2014-01-21,18000.00,true
+C-100126,Sara Alzahrani,sara.alzahrani6@gmail.com,+966581369229,SA,Abha,INDIVIDUAL,2022-02-21,,true
+C-100127,Mohammed Smith,,+966510161974,SA,Jeddah,INDIVIDUAL,2006-02-03,,true
+C-100128,Abeer Nasr,abeer.nasr57@hotmail.com,+971513270736,AE,Abu Dhabi,INDIVIDUAL,2017-06-24,,true
+C-100129,Summit Engineering,info@summitengineering.com.sa,+971586644260,AE,Abu Dhabi,BUSINESS,2023-04-24,190000.00,true
+C-100130,Turki Alotaibi,turki.alotaibi12@outlook.com,+97335520673,BH,Manama,INDIVIDUAL,2008-03-07,,true
+C-100131,Sara Farouk,sara.farouk67@hotmail.com,+966575955885,SA,Tabuk,INDIVIDUAL,2022-07-20,,true
+C-100132,هند الشمري,hind.alshammari37@yahoo.com,+966567374078,SA,Makkah,INDIVIDUAL,2008-09-02,,false
+C-100133,Omar Alotaibi,omar.alotaibi26@icloud.com,+966574045562,SA,Taif,INDIVIDUAL,2025-11-02,,true
+C-100134,Abeer Alshehri,,+966538202916,SA,Jeddah,INDIVIDUAL,2013-06-01,,true
+C-100135,Aisha Alsulami,,+966596946277,SA,Madinah,INDIVIDUAL,2026-02-01,,true
+C-100136,لمى المطيري,,+966523912295,SA,Madinah,INDIVIDUAL,2024-03-06,,true
+C-100137,ماجد حمدان,,+96564032020,KW,Kuwait City,INDIVIDUAL,2017-10-27,,true
+C-100138,Khalid Alomari,khalid.alomari35@outlook.com,,SA,Abha,INDIVIDUAL,2020-03-27,,true
+C-100139,Al Noor Trading,info@alnoortrading.com.sa,+923682447013,PK,Karachi,BUSINESS,2024-02-18,360000.00,true
+C-100140,Crescent Auto Parts,sales@crescentautoparts.com.sa,+966511619551,SA,Tabuk,BUSINESS,2016-01-22,25000.00,true
+C-100141,Mohammed Alomari,mohammed.alomari39@yahoo.com,+96566634961,KW,Kuwait City,INDIVIDUAL,2019-02-07,38500.00,true
+C-100142,هيا العمري,haya.alomari78@yahoo.com,+966578491746,SA,Madinah,INDIVIDUAL,2010-09-05,,true
+C-100143,Mohammed Albishri,mohammed.albishri11@outlook.com,+966542696686,SA,Taif,INDIVIDUAL,2010-06-20,25000.00,false
+C-100144,Maha Hamdan,maha.hamdan52@icloud.com,+971508029447,AE,Dubai,INDIVIDUAL,2005-11-11,,true
+C-100145,Majed Smith,majed.smith66@outlook.com,+966595693073,SA,Makkah,INDIVIDUAL,2008-10-15,,true
+C-100146,Aisha Haddad,aisha.haddad67@outlook.com,+966578486725,SA,Tabuk,INDIVIDUAL,2009-03-17,,true
+C-100147,Faisal Nasr,faisal.nasr79@yahoo.com,+966565780445,SA,Abha,INDIVIDUAL,2015-11-19,,true
+C-100148,يوسف حمدان,yousef.hamdan43@icloud.com,+966532336882,SA,Makkah,INDIVIDUAL,2015-08-19,,true
+C-100149,Maha Alzahrani,maha.alzahrani52@gmail.com,+966507060398,SA,Madinah,INDIVIDUAL,2018-04-23,,true
+C-100150,نجد للمقاولات,info@najdcontracting.com.sa,+966559636412,SA,Abha,BUSINESS,2020-05-30,225000.00,true
+C-100151,تركي فاروق,,+96568274574,KW,Kuwait City,INDIVIDUAL,2020-02-14,,true
+C-100152,Abdullah Farouk,abdullah.farouk90@hotmail.com,+201052113461,EG,Alexandria,INDIVIDUAL,2008-03-20,,true
+C-100153,Ali Alharbi,ali.alharbi82@hotmail.com,+919403289247,IN,Mumbai,INDIVIDUAL,2016-08-02,34500.00,true
+C-100154,هند العنزي,hind.alanazi78@gmail.com,+966596818870,SA,Abha,INDIVIDUAL,2019-09-28,30000.00,true
+C-100155,Omar Alshammari,omar.alshammari58@yahoo.com,,QA,Doha,INDIVIDUAL,2022-08-31,,false
+C-100156,Ahmed Khan,ahmed.khan96@hotmail.com,+971512518774,AE,Abu Dhabi,INDIVIDUAL,2017-06-07,,true
+C-100157,Haya Alharbi,,+966582693828,SA,,INDIVIDUAL,2020-02-28,,true
+C-100158,عائشة فاروق,aisha.farouk61@icloud.com,+966554309041,SA,Dammam,INDIVIDUAL,2022-02-25,45000.00,true
+C-100159,Reem Sharma,reem.sharma67@hotmail.com,+966581763882,SA,Taif,INDIVIDUAL,2026-03-28,7000.00,true
+C-100160,سلطان الدوسري,sultan.aldosari83@hotmail.com,+966506870192,SA,,INDIVIDUAL,2021-10-07,40500.00,true
+C-100161,Al Noor Trading,sales@alnoortrading.com.sa,+966574582423,SA,Abha,BUSINESS,2026-01-08,170000.00,true
+C-100162,Najd Contracting,sales@najdcontracting.com.sa,,AE,Dubai,BUSINESS,2009-08-18,105000.00,true
+C-100163,Reem Almutairi,reem.almutairi99@outlook.com,+966586037804,SA,Khobar,INDIVIDUAL,2016-03-15,,true
+C-100164,فيصل العنزي,faisal.alanazi14@hotmail.com,+966578453866,SA,Jeddah,INDIVIDUAL,2010-02-08,20000.00,true
+C-100165,Aisha Almutairi,aisha.almutairi27@icloud.com,+966539772732,SA,,INDIVIDUAL,2022-04-27,,true
+C-100166,Desert Rose Retail,info@desertroseretail.com.sa,+97451062763,QA,Doha,BUSINESS,2025-01-21,100000.00,true
+C-100167,خالد المطيري,khalid.almutairi42@gmail.com,+966583346373,SA,Makkah,INDIVIDUAL,2024-03-11,,true
+C-100168,عبير الحربي,,,SA,Makkah,INDIVIDUAL,2010-02-03,40000.00,true
+C-100169,Sara Albishri,sara.albishri48@hotmail.com,+966588596304,SA,,INDIVIDUAL,2005-12-06,31000.00,true
+C-100170,عمر سميث,omar.smith32@gmail.com,+966553462389,SA,Tabuk,INDIVIDUAL,2005-06-20,20000.00,true
+C-100171,Crescent Auto Parts,accounts@crescentautoparts.com.sa,+966541943573,SA,Abha,BUSINESS,2019-02-08,450000.00,true
+C-100172,Al Noor Trading,sales@alnoortrading.com.sa,+96566384308,KW,,BUSINESS,2015-01-12,290000.00,true
+C-100173,Rana Nasr,rana.nasr74@yahoo.com,+201097520680,EG,Cairo,INDIVIDUAL,2022-05-11,,true
+C-100174,Mohammed Alzahrani,mohammed.alzahrani30@yahoo.com,+966513733928,SA,Tabuk,INDIVIDUAL,2018-12-07,,true
+C-100175,Hind Alqahtani,hind.alqahtani31@outlook.com,,KW,Kuwait City,INDIVIDUAL,2005-05-10,24000.00,true
+C-100176,Ahmed Aldosari,ahmed.aldosari1@icloud.com,+966591718080,SA,Jeddah,INDIVIDUAL,2012-10-24,13000.00,true
+C-100177,مريم الغامدي,mariam.alghamdi29@icloud.com,+14151626191,US,New York,INDIVIDUAL,2022-10-20,,true
+C-100178,أحمد شارما,ahmed.sharma84@outlook.com,,KW,Kuwait City,INDIVIDUAL,2005-09-09,3500.00,true
+C-100179,مريم شارما,mariam.sharma32@gmail.com,+966542994443,SA,Makkah,INDIVIDUAL,2019-07-21,,true
+C-100180,Nasser Aldosari,nasser.aldosari53@icloud.com,+966507274696,SA,,INDIVIDUAL,2011-05-03,,true
+C-100181,Noura Smith,noura.smith42@hotmail.com,,SA,Taif,INDIVIDUAL,2018-04-10,36500.00,false
+C-100182,الرمال للعقارات,sales@sandsrealestate.com.sa,+966526487670,SA,Madinah,BUSINESS,2026-09-23,25000.00,true
+C-100183,Fatimah Alshammari,fatimah.alshammari26@hotmail.com,+96565348384,KW,Kuwait City,INDIVIDUAL,2005-09-02,,true
+C-100184,علي شارما,ali.sharma88@hotmail.com,+966501255563,SA,,INDIVIDUAL,2009-02-11,,true
+C-100185,سلطان حداد,sultan.haddad60@icloud.com,+923413311945,PK,Karachi,INDIVIDUAL,2016-10-06,,true
+C-100186,Al Noor Trading,accounts@alnoortrading.com.sa,+97455636269,QA,Doha,BUSINESS,2010-04-28,410000.00,false
+C-100187,وادي النخيل للمزارع,info@palmvalleyfarms.com.sa,+966562695234,SA,Taif,BUSINESS,2011-03-06,380000.00,false
+C-100188,Sultan Aldosari,sultan.aldosari87@gmail.com,,SA,Khobar,INDIVIDUAL,2012-03-15,,true
+C-100189,Red Sea Logistics,,+966518683912,SA,Khobar,BUSINESS,2019-07-10,460000.00,true
+C-100190,Oasis Water,sales@oasiswater.com.sa,+966501235103,SA,Madinah,BUSINESS,2008-02-22,65000.00,true
+C-100191,Faisal Nasr,faisal.nasr30@gmail.com,+966569595980,SA,Madinah,INDIVIDUAL,2023-05-20,,true
+C-100192,عبدالله الغامدي,abdullah.alghamdi16@outlook.com,+966537065740,SA,Madinah,INDIVIDUAL,2021-04-15,,true
+C-100193,أحمد الجهني,ahmed.aljuhani12@gmail.com,+966593719963,SA,Tabuk,INDIVIDUAL,2013-07-13,,false
+C-100194,Mohammed Alshammari,mohammed.alshammari26@yahoo.com,+966572100241,SA,Tabuk,INDIVIDUAL,2005-11-24,19500.00,true
+C-100195,Ahmed Albishri,ahmed.albishri97@hotmail.com,+97458380599,QA,Doha,INDIVIDUAL,2022-03-02,,true
+C-100196,سارة المطيري,sara.almutairi57@yahoo.com,+14157073814,US,New York,INDIVIDUAL,2025-06-03,31500.00,true
+C-100197,Gulf Star Foods,sales@gulfstarfoods.com.sa,+966506379358,SA,,BUSINESS,2023-11-15,425000.00,true
+C-100198,Rana Almutairi,rana.almutairi70@yahoo.com,+97330993356,BH,Manama,INDIVIDUAL,2011-08-15,,false
+C-100199,Gulf Star Foods,accounts@gulfstarfoods.com.sa,+96897548276,OM,Muscat,BUSINESS,2011-06-05,180000.00,false
+C-100200,ريم المطيري,reem.almutairi34@hotmail.com,+966548864914,SA,Abha,INDIVIDUAL,2026-01-09,,true
+C-100201,Turki Khan,turki.khan31@icloud.com,+96566418383,KW,Kuwait City,INDIVIDUAL,2013-08-16,30000.00,true
+C-100202,مريم حمدان,mariam.hamdan83@gmail.com,+966580835475,SA,Dammam,INDIVIDUAL,2007-10-27,,true
+C-100203,Haya Aljuhani,haya.aljuhani28@gmail.com,+966508237827,SA,Riyadh,INDIVIDUAL,2026-04-27,,true
+C-100204,Abdullah Aldosari,abdullah.aldosari43@yahoo.com,+966554374795,SA,Dammam,INDIVIDUAL,2020-03-11,33000.00,true
+C-100205,لمى القحطاني,lama.alqahtani5@icloud.com,+201037678593,EG,Alexandria,INDIVIDUAL,2006-05-02,44500.00,true
+C-100206,Lina Alghamdi,,+14155137039,US,New York,INDIVIDUAL,2013-02-21,,true
+C-100207,نجد للمقاولات,accounts@najdcontracting.com.sa,+97339943464,BH,Manama,BUSINESS,2015-06-20,280000.00,true
+C-100208,فهد فاروق,fahad.farouk23@hotmail.com,+966575075683,SA,Khobar,INDIVIDUAL,2009-10-04,,true
+C-100209,Hind Alghamdi,hind.alghamdi25@gmail.com,+966592662714,SA,Makkah,INDIVIDUAL,2007-12-23,,false
+C-100210,هيا الجهني,haya.aljuhani89@gmail.com,+97451559321,QA,Doha,INDIVIDUAL,2022-11-21,43500.00,true
+C-100211,وادي النخيل للمزارع,,+966517495030,SA,,BUSINESS,2018-05-05,400000.00,true
+C-100212,Omar Albishri,omar.albishri62@icloud.com,+966561100484,SA,Makkah,INDIVIDUAL,2019-11-18,,true
+C-100213,Reem Alqahtani,reem.alqahtani96@gmail.com,+966559596056,SA,Tabuk,INDIVIDUAL,2019-05-05,34500.00,true
+C-100214,Corniche Hospitality,info@cornichehospitality.com.sa,+971580312405,AE,Dubai,BUSINESS,2020-07-06,25000.00,false
+C-100215,Gulf Star Foods,sales@gulfstarfoods.com.sa,+97450207915,QA,Doha,BUSINESS,2014-09-15,440000.00,false
+C-100216,Oasis Water,accounts@oasiswater.com.sa,+966582945722,SA,Riyadh,BUSINESS,2026-06-21,90000.00,true
+C-100217,Abdullah Alharbi,abdullah.alharbi79@gmail.com,+966504800518,SA,Khobar,INDIVIDUAL,2017-04-22,,false
+C-100218,Hassan Alghamdi,hassan.alghamdi22@hotmail.com,+966585505875,SA,,INDIVIDUAL,2014-06-28,,false
+C-100219,لمى شارما,lama.sharma4@outlook.com,+966587718264,SA,Taif,INDIVIDUAL,2010-08-05,21000.00,false
+C-100220,Saud Aljuhani,saud.aljuhani71@hotmail.com,+966579554683,SA,,INDIVIDUAL,2014-07-11,,false
+C-100221,Lina Alharbi,lina.alharbi90@outlook.com,+966596744209,SA,Khobar,INDIVIDUAL,2018-04-17,,true
+C-100222,Lina Almutairi,lina.almutairi38@gmail.com,+971528977450,AE,Dubai,INDIVIDUAL,2006-05-09,,false
+C-100223,Hassan Khan,hassan.khan70@yahoo.com,+971589689619,AE,,INDIVIDUAL,2008-08-25,35000.00,false
+C-100224,Lina Alqahtani,,+96560144066,KW,Kuwait City,INDIVIDUAL,2017-11-19,36500.00,true
+C-100225,هيا حمدان,haya.hamdan27@yahoo.com,+971587893298,AE,Abu Dhabi,INDIVIDUAL,2022-11-05,16500.00,true
+C-100226,Sara Alqahtani,sara.alqahtani1@icloud.com,+966549524749,SA,,INDIVIDUAL,2008-03-09,,true
+C-100227,هند المطيري,hind.almutairi98@hotmail.com,+96896441715,OM,Muscat,INDIVIDUAL,2008-11-19,,true
+C-100228,Fahad Alanazi,fahad.alanazi80@gmail.com,+97453317070,QA,Doha,INDIVIDUAL,2007-03-12,,false
+C-100229,Fatimah Alshammari,fatimah.alshammari78@hotmail.com,,SA,Abha,INDIVIDUAL,2020-09-16,15500.00,true
+C-100230,Sara Alshehri,sara.alshehri72@icloud.com,+966538497134,SA,Tabuk,INDIVIDUAL,2008-09-10,11500.00,false
+C-100231,Red Sea Logistics,sales@redsealogistics.com.sa,+966584776911,SA,Makkah,BUSINESS,2005-05-24,280000.00,true
+C-100232,Corniche Hospitality,accounts@cornichehospitality.com.sa,+97330240183,BH,,BUSINESS,2014-12-06,385000.00,true
+C-100233,Nasser Smith,nasser.smith97@outlook.com,+97336573913,BH,Manama,INDIVIDUAL,2013-01-30,12500.00,true
+C-100234,سلطان الحربي,sultan.alharbi27@hotmail.com,+966570268692,SA,Makkah,INDIVIDUAL,2019-12-16,,true
+C-100235,هيا سميث,haya.smith47@gmail.com,+971565907590,AE,Dubai,INDIVIDUAL,2026-03-16,45500.00,false
+C-100236,Mohammed Alshammari,mohammed.alshammari2@gmail.com,+919272040504,IN,Mumbai,INDIVIDUAL,2018-04-03,47000.00,true
+C-100237,Oasis Water,accounts@oasiswater.com.sa,+96898697482,OM,Muscat,BUSINESS,2014-09-04,300000.00,true
+C-100238,Turki Alqahtani,turki.alqahtani68@outlook.com,+971580334040,AE,Dubai,INDIVIDUAL,2015-08-12,48500.00,true
+C-100239,Ali Aldosari,ali.aldosari71@hotmail.com,+97451519697,QA,Doha,INDIVIDUAL,2016-12-18,,true
+C-100240,Fahad Alomari,fahad.alomari49@yahoo.com,+966538675672,SA,Riyadh,INDIVIDUAL,2026-05-05,,true
+C-100241,Nasser Albishri,nasser.albishri49@yahoo.com,+14156141936,US,New York,INDIVIDUAL,2026-02-12,,true
+C-100242,Abeer Haddad,abeer.haddad2@gmail.com,+447836092802,GB,London,INDIVIDUAL,2017-04-23,20000.00,true
+C-100243,Rana Albishri,rana.albishri28@gmail.com,,SA,Jeddah,INDIVIDUAL,2005-03-31,,true
+C-100244,سارة فاروق,sara.farouk9@icloud.com,+96562661348,KW,Kuwait City,INDIVIDUAL,2013-11-04,,true
+C-100245,Mariam Smith,mariam.smith3@hotmail.com,+971557265020,AE,Sharjah,INDIVIDUAL,2025-06-12,,true
+C-100246,شركة النور للتجارة,sales@alnoortrading.com.sa,+966581643170,SA,Tabuk,BUSINESS,2007-08-30,50000.00,false
+C-100247,Sultan Aldosari,sultan.aldosari31@yahoo.com,+966574155945,SA,Tabuk,INDIVIDUAL,2023-03-06,21500.00,false
+C-100248,Tihama Electronics,accounts@tihamaelectronics.com.sa,+966569165811,SA,Riyadh,BUSINESS,2008-07-08,465000.00,true
+C-100249,Gulf Star Foods,accounts@gulfstarfoods.com.sa,,EG,Alexandria,BUSINESS,2010-12-22,385000.00,true
+C-100250,Blue Horizon Travel,accounts@bluehorizontravel.com.sa,+14152118715,US,,BUSINESS,2014-11-23,425000.00,true
+C-100251,Haya Sharma,,+14157263556,US,New York,INDIVIDUAL,2020-07-29,,true
+C-100252,Maha Smith,maha.smith96@hotmail.com,+966532062379,SA,Khobar,INDIVIDUAL,2014-08-14,,false
+C-100253,Ali Nasr,,+966579926389,SA,Tabuk,INDIVIDUAL,2021-12-10,1500.00,true
+C-100254,Majed Alharbi,majed.alharbi53@gmail.com,+14156300867,US,New York,INDIVIDUAL,2018-12-14,,false
+C-100255,Saud Sharma,saud.sharma6@outlook.com,+96561973177,KW,,INDIVIDUAL,2014-09-02,,true
+C-100256,يوسف الغامدي,yousef.alghamdi27@icloud.com,+966592679787,SA,Dammam,INDIVIDUAL,2007-11-15,42500.00,true
+C-100257,ناصر الشهري,nasser.alshehri18@hotmail.com,+447470124987,GB,London,INDIVIDUAL,2021-01-24,3000.00,true
+C-100258,القمة للهندسة,info@summitengineering.com.sa,+966517570211,SA,Jeddah,BUSINESS,2019-12-15,445000.00,true
+C-100259,Lama Alshehri,lama.alshehri78@gmail.com,+96568541385,KW,Kuwait City,INDIVIDUAL,2012-05-14,20000.00,false
+C-100260,Red Sea Logistics,accounts@redsealogistics.com.sa,+96897017612,OM,Muscat,BUSINESS,2006-04-19,195000.00,true
+C-100261,Reem Khan,reem.khan65@yahoo.com,,AE,Dubai,INDIVIDUAL,2024-03-10,,false
+C-100262,Corniche Hospitality,info@cornichehospitality.com.sa,+966509881792,SA,Madinah,BUSINESS,2012-12-29,470000.00,true
+C-100263,Jana Khan,jana.khan70@gmail.com,+201027159033,EG,Alexandria,INDIVIDUAL,2011-11-17,,true
+C-100264,سارة السلمي,sara.alsulami52@outlook.com,+966542791642,SA,Dammam,INDIVIDUAL,2022-06-01,,true
+C-100265,Mariam Hamdan,mariam.hamdan47@icloud.com,+962719666683,JO,Amman,INDIVIDUAL,2016-03-14,,false
+C-100266,رنا البشري,rana.albishri18@outlook.com,+201090934526,EG,Cairo,INDIVIDUAL,2009-06-11,29500.00,true
+C-100267,عائشة العنزي,aisha.alanazi11@gmail.com,+201087533159,EG,Cairo,INDIVIDUAL,2006-03-10,,true
+C-100268,وردة الصحراء للتجزئة,info@desertroseretail.com.sa,+966576132262,SA,Madinah,BUSINESS,2014-07-09,170000.00,true
+C-100269,رنا شارما,rana.sharma97@gmail.com,+966540897622,SA,Abha,INDIVIDUAL,2023-05-21,43500.00,true
+C-100270,Abdullah Albishri,abdullah.albishri9@yahoo.com,+966546744669,SA,Taif,INDIVIDUAL,2007-08-23,40000.00,false
+C-100271,سارة حمدان,,+966557602474,SA,Makkah,INDIVIDUAL,2021-10-20,,true
+C-100272,Aisha Alshammari,aisha.alshammari38@outlook.com,+97458884296,QA,Doha,INDIVIDUAL,2026-08-22,,true
+C-100273,يوسف العمري,yousef.alomari45@gmail.com,+966558249482,SA,Khobar,INDIVIDUAL,2010-02-06,,false
+C-100274,Haya Alomari,haya.alomari25@outlook.com,,EG,Alexandria,INDIVIDUAL,2007-04-13,,true
+C-100275,Sultan Alotaibi,sultan.alotaibi92@yahoo.com,+966537310362,SA,Khobar,INDIVIDUAL,2005-05-23,3000.00,true
+C-100276,Aisha Haddad,aisha.haddad46@hotmail.com,+201042602063,EG,Cairo,INDIVIDUAL,2021-08-04,,true
+C-100277,Ghada Alshammari,ghada.alshammari81@gmail.com,+201077230147,EG,Cairo,INDIVIDUAL,2024-06-21,,true
+C-100278,تركي الدوسري,turki.aldosari21@icloud.com,+971596333896,AE,Abu Dhabi,INDIVIDUAL,2011-02-26,,false
+C-100279,Ghada Alghamdi,ghada.alghamdi99@gmail.com,+201038850514,EG,Alexandria,INDIVIDUAL,2018-07-23,,true
+C-100280,Fahad Alshammari,fahad.alshammari73@hotmail.com,,SA,Jeddah,INDIVIDUAL,2026-04-10,,true
