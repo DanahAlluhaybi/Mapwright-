@@ -7,13 +7,24 @@ changes nothing; it is the floor any real system must beat.
 
 They also test the scorer itself: if ``perfect`` does not score perfectly,
 the scorer is wrong.
+
+``rules`` is system R, the rules-only pipeline, written here so every
+system is run the same way.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from .loading import BenchmarkCase, write_run_case
+from mapwright.output import write_run
+from mapwright.pipeline import run
+
+from .loading import (
+    DATASETS,
+    BenchmarkCase,
+    load_reference_customer_ids,
+    write_run_case,
+)
 
 
 def _manifest_detections(case: BenchmarkCase) -> list[dict]:
@@ -79,4 +90,12 @@ def passthrough(case: BenchmarkCase, directory: Path) -> None:
     write_run_case(directory, case.contract, rows, list(range(1, len(rows) + 1)), result)
 
 
-SYSTEMS = {"perfect": perfect, "passthrough": passthrough}
+def rules(case: BenchmarkCase, directory: Path) -> None:
+    """System R: the rules-only pipeline. It sees the source file and nothing else."""
+    references = {}
+    if case.contract.entity == "sales_order":
+        references["customer_id"] = load_reference_customer_ids()
+    write_run(run(DATASETS / case.id / "source.csv", case.contract, references), directory)
+
+
+SYSTEMS = {"perfect": perfect, "passthrough": passthrough, "rules": rules}

@@ -1,0 +1,18 @@
+# Approval policy thresholds. Every number that decides whether a change is
+# applied or sent to a person lives here, so its effect can be measured.
+
+# Issue types a person must sign off. Mirrors ``risk: review`` in
+# benchmark/issue_types.yaml; a test keeps the two in step.
+review_issues: [M4, M6, S3, S5, S7, S8, V2, V4, V7]
+
+# Action types that are never applied without approval.
+hold_actions: [drop_rows]
+
+# LLM actions below this confidence wait for review.
+min_llm_confidence: 0.8
+
+# An action from one of these origins that changes more than this share of
+# a column's non-null values waits for review. Rules are deterministic
+# dictionary and format conversions, so they are exempt by default.
+large_change_share: 0.2
+large_change_origins: [llm]

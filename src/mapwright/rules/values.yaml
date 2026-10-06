@@ -1,0 +1,93 @@
+# Value dictionaries: source spellings -> canonical target values.
+#
+# Lookups ignore case and repeated spaces. A canonical value always maps to
+# itself, so only variants need listing. ``issue`` is the label a change
+# made with this dictionary is reported under.
+
+missing_tokens: ["n/a", "na", "-", "--", "unknown", "null", "لا يوجد"]
+
+fields:
+  country_code:
+    issue: V1
+    values:
+      SA: [KSA, Saudi Arabia, Saudi, السعودية]
+      AE: [UAE, United Arab Emirates, الإمارات]
+      KW: [Kuwait, الكويت]
+      BH: [Bahrain, البحرين]
+      QA: [Qatar, قطر]
+      OM: [Oman, عمان]
+      EG: [Egypt, مصر]
+      JO: [Jordan, الأردن]
+      US: [USA, United States]
+      GB: [UK, United Kingdom]
+      IN: [India, الهند]
+      PK: [Pakistan, باكستان]
+
+  city:
+    issue: V1
+    values:
+      Jeddah: [Jedda, JED, جدة]
+      Riyadh: [Riyad, RUH, الرياض]
+      Makkah: [Mecca, مكة]
+      Madinah: [Medina, المدينة]
+      Dammam: [DMM, الدمام]
+      Khobar: [Al Khobar, الخبر]
+      Taif: [الطائف]
+      Abha: [أبها]
+      Tabuk: [تبوك]
+      Dubai: [DXB, دبي]
+      Abu Dhabi: [AUH, أبوظبي]
+      Sharjah: [الشارقة]
+      Kuwait City: [Kuwait]
+      Manama: [المنامة]
+      Doha: [الدوحة]
+      Muscat: [مسقط]
+      Cairo: [القاهرة]
+      Alexandria: [الإسكندرية]
+      Amman: [عمّان]
+      New York: [NYC, New York City]
+      London: [لندن]
+      Mumbai: [Bombay]
+      Karachi: [كراتشي]
+
+  customer_type:
+    issue: V1
+    values:
+      INDIVIDUAL: [Individual, Person, B2C, فرد]
+      BUSINESS: [Business, Company, B2B, شركة]
+
+  status:
+    issue: V6
+    values:
+      PENDING: [Awaiting shipment, قيد الانتظار]
+      SHIPPED: [Dispatched, تم الشحن]
+      DELIVERED: [Delivered to client, تم التسليم]
+      CANCELLED: [Canceled, ملغي]
+      RETURNED: [Returned - damaged, مرتجع]
+
+  channel:
+    issue: V1
+    values:
+      ONLINE: [Web, E-commerce]
+      STORE: [In-store, Branch, POS]
+      PHONE: [Call center, Telephone]
+      PARTNER: [Reseller]
+
+  currency:
+    issue: V1
+    values:
+      SAR: [SR, Riyal, ريال]
+      AED: [Dhs, Dirham]
+      USD: [$, US$]
+      EUR: [€, Euro]
+      KWD: [KD]
+      BHD: [BD]
+      QAR: [QR]
+      OMR: [RO]
+
+# Applied to every boolean field.
+boolean:
+  issue: V5
+  values:
+    "true": [Y, "Yes", Active, "1", نعم]
+    "false": [N, "No", Inactive, "0", لا]

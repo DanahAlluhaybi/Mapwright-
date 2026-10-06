@@ -3,6 +3,10 @@
     python -m benchmark.generator generate    write every case and the reference table
     python -m benchmark.generator freeze      record hashes of the held-out files
     python -m benchmark.generator verify      regenerate and compare with what is on disk
+
+H04 is not generated: it is a real export, sampled and mapped by
+``benchmark.real.companies_house``. ``verify`` rebuilds its ground truth
+from its source and checks it against the frozen hashes like the rest.
 """
 
 from __future__ import annotations
@@ -11,6 +15,8 @@ import argparse
 import sys
 import tempfile
 from pathlib import Path
+
+from benchmark.real import companies_house
 
 from .build import ROOT, build_case, sha256, write_case, write_reference_customers
 from .cases import CASES
@@ -31,13 +37,20 @@ def generate(out: Path) -> None:
               f"{built.manifest['target_rows']:>4} target rows  {len(built.manifest['issues']):>3} issue entries")
 
 
+REAL_CASES = ("H04",)
+
+
+def _heldout_ids() -> list[str]:
+    ids = [case.id for case in CASES if case.split == "heldout"]
+    return ids + [case_id for case_id in REAL_CASES if (DATASETS / case_id / "source.csv").exists()]
+
+
 def _heldout_hashes(root: Path) -> dict[str, str]:
     hashes = {}
-    for case in CASES:
-        if case.split == "heldout":
-            for name in CASE_FILES:
-                relative = f"{case.id}/{name}"
-                hashes[relative] = sha256(root / relative)
+    for case_id in _heldout_ids():
+        for name in CASE_FILES:
+            relative = f"{case_id}/{name}"
+            hashes[relative] = sha256(root / relative)
     return hashes
 
 
@@ -66,6 +79,18 @@ def verify() -> int:
                     problems.append(f"differs from generator output: {relative}")
         if not REFERENCE.exists() or sha256(REFERENCE) != sha256(fresh.parent / REFERENCE.name):
             problems.append("reference_customers.csv differs from generator output")
+
+        real = DATASETS / "H04"
+        if (real / "source.csv").exists():
+            rebuilt = Path(tmp) / "H04"
+            rebuilt.mkdir()
+            (rebuilt / "source.csv").write_bytes((real / "source.csv").read_bytes())
+            companies_house.build(rebuilt)
+            for name in ("ground_truth.csv", "manifest.json"):
+                if not (real / name).exists():
+                    problems.append(f"missing H04/{name}")
+                elif sha256(real / name) != sha256(rebuilt / name):
+                    problems.append(f"differs from companies_house build: H04/{name}")
 
     if FROZEN.exists():
         recorded = {}

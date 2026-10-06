@@ -1,0 +1,31 @@
+# Header synonyms per target field, used by column mapping.
+#
+# Headers are compared after normalization: lower case, camelCase split,
+# punctuation turned into spaces. A field's own name always matches.
+
+customer:
+  customer_id: [customer id, cust no, customer no, customer number, cust id, client id, account no, رقم العميل]
+  full_name: [name, customer name, cust nm, cust name, client name, اسم العميل, الاسم]
+  email: [e mail, email address, email addr, mail, البريد الإلكتروني, البريد]
+  phone: [phone number, phone no, tel no, tel, telephone, mobile, mobile number, mobile no, الجوال, الهاتف, رقم الجوال]
+  country_code: [country, ctry, country code, الدولة, البلد]
+  city: [city nm, city name, town, المدينة]
+  customer_type: [type, customer type, cust typ, cust type, segment, نوع العميل]
+  signup_date: [signup date, open dt, open date, created at, created, registration date, join date, تاريخ التسجيل]
+  credit_limit: [credit limit, cr lmt, credit, الحد الائتماني]
+  is_active: [active, actv flg, active flag, نشط]
+
+sales_order:
+  order_id: [order, order id, order no, order number, txn id, transaction id, doc no]
+  customer_id: [customer, customer id, customer code, customer no, cust ref, cust id, client]
+  order_date: [order date, doc date, date, txn datetime, txn date, transaction date]
+  currency: [curr, ccy, currency code]
+  amount: [net amount, total, total amount, gross amount, value]
+  status: [order status, state]
+  channel: [sales channel]
+
+# Columns that together make up one field.
+parts:
+  full_name:
+    - [first name, given name, fname]
+    - [last name, surname, family name, lname]

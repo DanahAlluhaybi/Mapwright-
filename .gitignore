@@ -7,3 +7,4 @@ __pycache__/
 runs/
 results/
 .pytest_cache/
+benchmark/raw/

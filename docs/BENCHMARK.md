@@ -110,8 +110,8 @@ stable target.
 
 Eight development cases are used while building rules and prompts. Three
 generated held-out cases use header styles and value variants that never
-appear in development. A fourth held-out case, H04, will come from a real
-public dataset.
+appear in development. A fourth held-out case, H04, comes from a real
+public export.
 
 | ID | Split | Entity | Source style | Issues |
 | --- | --- | --- | --- | --- |
@@ -126,11 +126,26 @@ public dataset.
 | H01 | held-out | customer | camelCase and transliterated Arabic headers; every date is day/month ambiguous | M1, M2, V1, V2, V3, V5 |
 | H02 | held-out | customer | Most cell-level customer issues at once, at higher noise | M1, M5, S1–S6, S8, S9, V1, V3, V4, V5, V7 |
 | H03 | held-out | sales_order | Unseen status phrasings, currency notations and channel names | M1, S1, S7, V1, V4, V6 |
-| H04 | held-out | customer | From a real public dataset, re-mapped by hand | Not built yet |
+| H04 | held-out | customer | Real export: Companies House basic company data, 55 columns, mapped by hand | M1, M5, M6, S4, V1, V2, V5 |
 
 H04 is the honesty check: it is the only case whose messiness was not
-designed by us. If no suitable public dataset is found, H04 becomes one more
-generated held-out style, and the report says so.
+designed by us. Its source is 300 rows sampled from the Companies House
+Free Company Data Product (UK company register, October 2026 snapshot,
+Open Government Licence v3.0): companies registered in London and
+incorporated since 2000, with every column and value exactly as
+published. Nothing is injected. The ground truth comes from a fixed,
+documented mapping written once in `benchmark/real/companies_house.py`,
+which `verify` re-runs against the frozen hashes.
+
+What makes it hard is real: 48 irrelevant columns, headers with leading
+spaces (`" CompanyNumber"`), upper-case names with punctuation and
+digits, a legal category that has to be read as a customer type, a free
+text status that has to become a boolean, day-first dates, and three
+contract fields (email, phone, credit limit) the export simply does not
+have. It is narrower than the generated cases: no Arabic, one country,
+and, because part 1 of the export is sorted by name, only names starting
+with a digit, A or B. Acronyms in names follow the contract's title-case
+rule literally (`(UK)` becomes `(Uk)`).
 
 D02's day-first dates can be resolved from evidence (some days are above
 12). H01's cannot: every day is 12 or below, so the only correct behavior is
@@ -172,8 +187,9 @@ frozen.
 
 ## Known limitations
 
-- All current cases are synthetic. Generated messiness is cleaner than real
-  messiness; H04 exists to show how large that gap is.
+- Eleven of the twelve cases are synthetic. Generated messiness is cleaner
+  than real messiness; H04 exists to show how large that gap is, but it is
+  one export from one source.
 - One target schema per entity. Mapping onto an unseen target contract is
   out of scope.
 - Case sizes are small (hundreds of rows) to keep LLM cost and evaluation
