@@ -1,0 +1,18 @@
+{
+  "request": {
+    "prompt": "{\n \"task\": \"These values sit in the source column that feeds the target field below. Propose actions, chosen only from the allowed action types, that turn them into the field's canonical form. Keys of map_values and set_null tokens must be copied exactly from the values listed. Map a value only when you are confident what it means; list the rest under unresolved.\",\n \"context\": \"source column(s) ['Country']\",\n \"field\": {\n  \"name\": \"country_code\",\n  \"type\": \"string\",\n  \"required\": true,\n  \"canonical_form\": \"ISO 3166-1 alpha-2.\",\n  \"allowed_values\": [\n   \"SA\",\n   \"AE\",\n   \"KW\",\n   \"BH\",\n   \"QA\",\n   \"OM\",\n   \"EG\",\n   \"JO\",\n   \"US\",\n   \"GB\",\n   \"IN\",\n   \"PK\"\n  ]\n },\n \"values\": [\n  \"SA\",\n  \"AE\",\n  \"EG\",\n  \"OM\",\n  \"KW\",\n  \"JO\",\n  \"BH\",\n  \"QA\",\n  \"IN\",\n  \"PK\",\n  \"US\",\n  \"GB\"\n ],\n \"allowed_actions\": {\n  \"set_null\": {\n   \"tokens\": [\n    \"<value exactly as shown that stands for a missing value>\"\n   ]\n  },\n  \"map_values\": {\n   \"mapping\": {\n    \"<value exactly as shown>\": \"<allowed value>\"\n   }\n  }\n },\n \"answer_schema\": {\n  \"actions\": [\n   {\n    \"type\": \"<allowed action>\",\n    \"...\": \"parameters\",\n    \"confidence\": \"0..1\",\n    \"reason\": \"<short>\"\n   }\n  ],\n  \"unresolved\": [\n   \"<value>\"\n  ]\n }\n}",
+    "system": "You help migrate messy legacy data exports into a fixed target schema.\nYou never write code, SQL or formulas. You answer with one JSON object that\nfollows the schema given in the request, and nothing else.\nWhen you are not sure, say so with a low confidence or leave the item out:\na person reviews uncertain items, and an invented answer is worse than none.",
+    "model": "gemini-3.8-flash",
+    "prompt_version": "values-v1",
+    "temperature": 0.0,
+    "json_output": true,
+    "sample": 0
+  },
+  "response": {
+    "text": "{\n \"actions\": [\n  {\n   \"type\": \"map_values\",\n   \"mapping\": {\n    \"SA\": \"SA\",\n    \"AE\": \"AE\",\n    \"EG\": \"EG\",\n    \"OM\": \"OM\",\n    \"KW\": \"KW\",\n    \"JO\": \"JO\",\n    \"BH\": \"BH\",\n    \"QA\": \"QA\",\n    \"IN\": \"IN\",\n    \"PK\": \"PK\",\n    \"US\": \"US\",\n    \"GB\": \"GB\"\n   },\n   \"confidence\": 1.0,\n   \"reason\": \"All source values are already valid ISO 3166-1 alpha-2 country codes matching the allowed values.\"\n  }\n ],\n \"unresolved\": []\n}",
+    "model": "gemini-3.8-flash",
+    "input_tokens": 514,
+    "output_tokens": 177,
+    "cached": false
+  }
+}

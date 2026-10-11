@@ -1,4 +1,6 @@
-"""Two reference systems that bracket every real result.
+"""Every evaluated system, written in one place so all run the same way.
+
+Two reference systems bracket every real result.
 
 ``perfect`` outputs the ground truth and reports exactly the manifest's
 issues; every metric should come out at its best value. ``passthrough``
@@ -8,23 +10,28 @@ changes nothing; it is the floor any real system must beat.
 They also test the scorer itself: if ``perfect`` does not score perfectly,
 the scorer is wrong.
 
-``rules`` is system R, the rules-only pipeline, written here so every
-system is run the same way.
+``rules`` is system R, the rules-only pipeline. ``llm``, ``hybrid`` and
+``hybrid-norepair`` are systems L, H and H−.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
+from mapwright.llm import CachedProvider
+from mapwright.llmplan import LLMSession
 from mapwright.output import write_run
 from mapwright.pipeline import run
 
 from .loading import (
     DATASETS,
+    ROOT,
     BenchmarkCase,
     load_reference_customer_ids,
     write_run_case,
 )
+
+LLM_CACHE = ROOT / "llm_cache"
 
 
 def _manifest_detections(case: BenchmarkCase) -> list[dict]:
@@ -90,12 +97,59 @@ def passthrough(case: BenchmarkCase, directory: Path) -> None:
     write_run_case(directory, case.contract, rows, list(range(1, len(rows) + 1)), result)
 
 
+def _references(case: BenchmarkCase) -> dict:
+    if case.contract.entity == "sales_order":
+        return {"customer_id": load_reference_customer_ids()}
+    return {}
+
+
 def rules(case: BenchmarkCase, directory: Path) -> None:
     """System R: the rules-only pipeline. It sees the source file and nothing else."""
-    references = {}
-    if case.contract.entity == "sales_order":
-        references["customer_id"] = load_reference_customer_ids()
-    write_run(run(DATASETS / case.id / "source.csv", case.contract, references), directory)
+    write_run(run(DATASETS / case.id / "source.csv", case.contract, _references(case)), directory)
 
 
-SYSTEMS = {"perfect": perfect, "passthrough": passthrough, "rules": rules}
+class LLMSettings:
+    """How LLM systems reach the model for this process.
+
+    By default answers are replayed from ``llm_cache/`` and a missing answer
+    is an error, so scoring never needs a key. ``record`` calls Gemini for
+    anything not cached yet and stores the answer.
+    """
+
+    record = False
+    model = ""
+    sample = 0
+    _provider = None
+
+    @classmethod
+    def provider(cls):
+        """One provider per process, so request spacing holds across cases."""
+        if cls._provider is None:
+            from mapwright.llm.gemini import GeminiProvider, default_model
+
+            if cls.record:
+                cls._provider = CachedProvider(LLM_CACHE, GeminiProvider(cls.model or None))
+            else:
+                cls._provider = CachedProvider(LLM_CACHE, model=cls.model or default_model())
+        return cls._provider
+
+
+def _llm_system(system: str, repair: bool):
+    def run_case(case: BenchmarkCase, directory: Path) -> None:
+        session = LLMSession(LLMSettings.provider(), sample=LLMSettings.sample, repair=repair)
+        source = DATASETS / case.id / "source.csv"
+        outcome = run(source, case.contract, _references(case), system=system, session=session)
+        write_run(outcome, directory)
+
+    return run_case
+
+
+SYSTEMS = {
+    "perfect": perfect,
+    "passthrough": passthrough,
+    "rules": rules,
+    "llm": _llm_system("llm", repair=False),
+    "hybrid": _llm_system("hybrid", repair=True),
+    "hybrid-norepair": _llm_system("hybrid", repair=False),
+}
+LLM_SYSTEMS = {"llm", "hybrid", "hybrid-norepair"}

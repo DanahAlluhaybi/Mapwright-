@@ -1,0 +1,18 @@
+{
+  "request": {
+    "prompt": "{\n \"task\": \"These values sit in the source column that feeds the target field below. Propose actions, chosen only from the allowed action types, that turn them into the field's canonical form. Keys of map_values and set_null tokens must be copied exactly from the values listed. Map a value only when you are confident what it means; list the rest under unresolved.\",\n \"context\": \"source column(s) ['Customer ID']\",\n \"field\": {\n  \"name\": \"customer_id\",\n  \"type\": \"string\",\n  \"required\": true,\n  \"canonical_form\": \"Source identifier, trimmed and upper-cased. Never re-generated.\",\n  \"pattern\": \"^[A-Z0-9-]{3,20}$\"\n },\n \"values\": [\n  \"C-100001\",\n  \"C-100002\",\n  \"C-100003\",\n  \"C-100004\",\n  \"C-100005\",\n  \"C-100006\",\n  \"C-100007\",\n  \"C-100008\",\n  \"C-100009\",\n  \"C-100010\",\n  \"C-100011\",\n  \"C-100012\",\n  \"C-100013\",\n  \"C-100014\",\n  \"C-100015\",\n  \"C-100016\",\n  \"C-100017\",\n  \"C-100018\",\n  \"C-100019\",\n  \"C-100020\",\n  \"C-100021\",\n  \"C-100022\",\n  \"C-100023\",\n  \"C-100024\",\n  \"C-100025\",\n  \"C-100026\",\n  \"C-100027\",\n  \"C-100028\",\n  \"C-100029\",\n  \"C-100030\",\n  \"C-100031\",\n  \"C-100032\",\n  \"C-100033\",\n  \"C-100034\",\n  \"C-100035\",\n  \"C-100036\",\n  \"C-100037\",\n  \"C-100038\",\n  \"C-100039\",\n  \"C-100040\",\n  \"C-100041\",\n  \"C-100042\",\n  \"C-100043\",\n  \"C-100044\",\n  \"C-100045\",\n  \"C-100046\",\n  \"C-100047\",\n  \"C-100048\",\n  \"C-100049\",\n  \"C-100050\",\n  \"C-100051\",\n  \"C-100054\",\n  \"C-100062\",\n  \"C-100088\",\n  \"C-100097\",\n  \"C-100107\",\n  \"C-100114\",\n  \"C-100124\",\n  \"C-100136\",\n  \"C-100148\",\n  \"C-100168\",\n  \"C-100169\",\n  \"C-100172\",\n  \"C-100183\",\n  \"C-100200\",\n  \"C-100204\",\n  \"C-100232\",\n  \"C-100233\",\n  \"C-100241\",\n  \"C-100244\"\n ],\n \"allowed_actions\": {\n  \"set_null\": {\n   \"tokens\": [\n    \"<value exactly as shown that stands for a missing value>\"\n   ]\n  },\n  \"normalize_text\": {\n   \"case\": \"keep | upper | lower | title_if_uniform\"\n  }\n },\n \"answer_schema\": {\n  \"actions\": [\n   {\n    \"type\": \"<allowed action>\",\n    \"...\": \"parameters\",\n    \"confidence\": \"0..1\",\n    \"reason\": \"<short>\"\n   }\n  ],\n  \"unresolved\": [\n   \"<value>\"\n  ]\n }\n}",
+    "system": "You help migrate messy legacy data exports into a fixed target schema.\nYou never write code, SQL or formulas. You answer with one JSON object that\nfollows the schema given in the request, and nothing else.\nWhen you are not sure, say so with a low confidence or leave the item out:\na person reviews uncertain items, and an invented answer is worse than none.",
+    "model": "gemini-3.8-flash",
+    "prompt_version": "values-v1",
+    "temperature": 0.0,
+    "json_output": true,
+    "sample": 0
+  },
+  "response": {
+    "text": "{\n \"actions\": [\n  {\n   \"type\": \"normalize_text\",\n   \"case\": \"upper\",\n   \"confidence\": 1.0,\n   \"reason\": \"Ensure all source identifiers are trimmed and upper-cased per canonical form specification.\"\n  }\n ],\n \"unresolved\": []\n}",
+    "model": "gemini-3.8-flash",
+    "input_tokens": 1244,
+    "output_tokens": 72,
+    "cached": false
+  }
+}

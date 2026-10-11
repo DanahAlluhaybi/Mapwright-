@@ -1,0 +1,11 @@
+# Policy variant for the sensitivity analysis in docs/RESULTS.md: identical
+# to src/mapwright/policy.yaml except that confident model changes to a
+# large share of a column are applied (and flagged where the issue type
+# needs sign-off) instead of held. Low-confidence model answers are still
+# held.
+
+review_issues: [M4, M6, S3, S5, S7, S8, V2, V4, V7]
+hold_actions: [drop_rows]
+min_llm_confidence: 0.8
+large_change_share: 0.2
+large_change_origins: []

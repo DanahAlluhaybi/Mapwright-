@@ -1,0 +1,18 @@
+{
+  "request": {
+    "prompt": "{\n \"task\": \"These values sit in the source column that feeds the target field below. Propose actions, chosen only from the allowed action types, that turn them into the field's canonical form. Keys of map_values and set_null tokens must be copied exactly from the values listed. Map a value only when you are confident what it means; list the rest under unresolved.\",\n \"context\": \"source column(s) ['City']\",\n \"field\": {\n  \"name\": \"city\",\n  \"type\": \"string\",\n  \"required\": false,\n  \"canonical_form\": \"English city name exactly as listed in the reference file.\",\n  \"allowed_values\": [\n   \"Abha\",\n   \"Abu Dhabi\",\n   \"Alexandria\",\n   \"Amman\",\n   \"Cairo\",\n   \"Dammam\",\n   \"Doha\",\n   \"Dubai\",\n   \"Jeddah\",\n   \"Karachi\",\n   \"Khobar\",\n   \"Kuwait City\",\n   \"London\",\n   \"Madinah\",\n   \"Makkah\",\n   \"Manama\",\n   \"Mumbai\",\n   \"Muscat\",\n   \"New York\",\n   \"Riyadh\",\n   \"Sharjah\",\n   \"Tabuk\",\n   \"Taif\"\n  ]\n },\n \"values\": [\n  \"Dammam\",\n  \"Khobar\",\n  \"Taif\",\n  \"Riyadh\",\n  \"Tabuk\",\n  \"Makkah\",\n  \"Muscat\",\n  \"Madinah\",\n  \"Amman\",\n  \"Jeddah\",\n  \"Kuwait City\",\n  \"Manama\",\n  \"Abha\",\n  \"Dubai\",\n  \"Sharjah\",\n  \"Abu Dhabi\",\n  \"Doha\",\n  \"Alexandria\",\n  \"Cairo\",\n  \"Karachi\",\n  \"Mumbai\",\n  \"New York\",\n  \"London\"\n ],\n \"allowed_actions\": {\n  \"set_null\": {\n   \"tokens\": [\n    \"<value exactly as shown that stands for a missing value>\"\n   ]\n  },\n  \"map_values\": {\n   \"mapping\": {\n    \"<value exactly as shown>\": \"<allowed value>\"\n   }\n  }\n },\n \"answer_schema\": {\n  \"actions\": [\n   {\n    \"type\": \"<allowed action>\",\n    \"...\": \"parameters\",\n    \"confidence\": \"0..1\",\n    \"reason\": \"<short>\"\n   }\n  ],\n  \"unresolved\": [\n   \"<value>\"\n  ]\n }\n}",
+    "system": "You help migrate messy legacy data exports into a fixed target schema.\nYou never write code, SQL or formulas. You answer with one JSON object that\nfollows the schema given in the request, and nothing else.\nWhen you are not sure, say so with a low confidence or leave the item out:\na person reviews uncertain items, and an invented answer is worse than none.",
+    "model": "gemini-3.8-flash",
+    "prompt_version": "values-v1",
+    "temperature": 0.0,
+    "json_output": true,
+    "sample": 0
+  },
+  "response": {
+    "text": "{\n \"actions\": [\n  {\n   \"type\": \"map_values\",\n   \"mapping\": {\n    \"Abha\": \"Abha\",\n    \"Abu Dhabi\": \"Abu Dhabi\",\n    \"Alexandria\": \"Alexandria\",\n    \"Amman\": \"Amman\",\n    \"Cairo\": \"Cairo\",\n    \"Dammam\": \"Dammam\",\n    \"Doha\": \"Doha\",\n    \"Dubai\": \"Dubai\",\n    \"Jeddah\": \"Jeddah\",\n    \"Karachi\": \"Karachi\",\n    \"Khobar\": \"Khobar\",\n    \"Kuwait City\": \"Kuwait City\",\n    \"London\": \"London\",\n    \"Madinah\": \"Madinah\",\n    \"Makkah\": \"Makkah\",\n    \"Manama\": \"Manama\",\n    \"Mumbai\": \"Mumbai\",\n    \"Muscat\": \"Muscat\",\n    \"New York\": \"New York\",\n    \"Riyadh\": \"Riyadh\",\n    \"Sharjah\": \"Sharjah\",\n    \"Tabuk\": \"Tabuk\",\n    \"Taif\": \"Taif\"\n   },\n   \"confidence\": 1.0,\n   \"reason\": \"Exact match to allowed values.\"\n  }\n ],\n \"unresolved\": []\n}",
+    "model": "gemini-3.8-flash",
+    "input_tokens": 667,
+    "output_tokens": 293,
+    "cached": false
+  }
+}

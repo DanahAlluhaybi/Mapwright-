@@ -295,3 +295,45 @@ def plan_rows(ctx: Context) -> Iterator[Proposal]:
 def plan_missing_columns(missing: list[str]) -> Iterator[Finding]:
     for target in missing:
         yield Finding("M6", target, note="no source column carries this field")
+
+
+def _validation_label(contract: Contract, f: Field) -> str:
+    if f.type in ("date", "decimal"):
+        return "S1"
+    dictionary = value_dictionary(contract, f)
+    if dictionary is not None:
+        return dictionary.issue
+    return "S6"
+
+
+def validation_findings(ctx: Context, f: Field | None) -> Iterator[Finding]:
+    """Contract failures left after a planner that has no rules of its own.
+
+    With a field: values that still break a format or range rule. Without
+    one: missing required values and orphan foreign keys, across the table.
+    """
+    contract, ws = ctx.contract, ctx.ws
+    if f is not None:
+        unreadable, outside = [], []
+        for n, v in _filled(ws, f.name).items():
+            broken = set(check_value(contract, f, v))
+            if broken & {"type", "pattern", "allowed_values", "reference"}:
+                unreadable.append(n)
+            elif "range" in broken:
+                outside.append(n)
+        if unreadable:
+            yield Finding(_validation_label(contract, f), f.name, unreadable, note="breaks the contract")
+        if outside:
+            yield Finding("S5", f.name, outside, note="outside the contract's range; not changed")
+        return
+
+    for field_ in contract.fields:
+        if field_.required and field_.name not in ctx.missing:
+            blank = [n for n, v in ws.values(field_.name).items() if not v.strip()]
+            if blank:
+                yield Finding("S3", field_.name, blank, note="required value is missing")
+        allowed = ctx.references.get(field_.name)
+        if field_.foreign_key and allowed is not None:
+            orphans = [n for n, v in ws.values(field_.name).items() if v and v not in allowed]
+            if orphans:
+                yield Finding("S7", field_.name, orphans, note=f"not found in {field_.foreign_key}")

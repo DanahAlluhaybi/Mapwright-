@@ -137,14 +137,25 @@ effect can be measured.
 
 ## What the LLM sees
 
-Profiles, column names, up to 50 most frequent distinct values plus 20
-random ones per column, and up to 10 sample rows. Never the full table.
-This bounds cost per case regardless of row count, and keeps most of the
-data out of prompts.
+For mapping: column names, profiles and up to 25 distinct values per
+column. For value actions: one request per file covering every field that
+needs work, each with its contract and up to 50 frequent distinct values
+plus 20 others (the hybrid sends only the values the rules could not
+read). Two requests per file keeps a run inside free-tier daily limits. Never the full table. This bounds cost per case
+regardless of row count, and keeps most of the data out of prompts.
 
-Every response is validated against the action schema. A malformed
-response gets one retry; after that it counts as a hallucinated action in
-the evaluation.
+Every proposal is checked by code before it can run
+(`src/mapwright/llmplan.py`): columns must exist and be unused, targets
+must be open contract fields, `map_values` keys must be values that were
+shown and its outputs allowed values, `set_null` tokens must have been
+shown, date formats must read at least one value, and day/month order is
+re-checked by code. A proposal that fails counts as an invalid
+(hallucinated) action. In H, an invalid or failed action, or a parse that
+leaves shown values unread, goes back to the model with the failure report
+(`revise-v1`), at most twice.
+
+Prompts live in `src/mapwright/llm/prompts.py` with a version string
+(`map-v1`, `values-v2`, `revise-v1`) that is part of every cache key.
 
 ## Outputs
 

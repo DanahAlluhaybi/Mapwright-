@@ -34,6 +34,7 @@ class Field:
     precision: int | None = None
     reference: str | None = None
     foreign_key: str | None = None
+    canonical: str | None = None
 
 
 @dataclass(frozen=True)
@@ -92,6 +93,7 @@ def load_contract(path: str | Path) -> Contract:
             precision=spec.get("precision"),
             reference=spec.get("reference"),
             foreign_key=spec.get("foreign_key"),
+            canonical=" ".join(str(spec["canonical"]).split()) if spec.get("canonical") else None,
         )
         fields.append(f)
         if f.reference:

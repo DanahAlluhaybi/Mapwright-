@@ -32,7 +32,7 @@ cases frozen.
 | H04 from a real public export (Companies House) | Done |
 | Scorer, with its own tests and reference systems | Done |
 | Rules-only baseline (system R) | Done |
-| LLM semantic layer and repair loop | Next |
+| LLM layer: Gemini provider, cache, mapping, value actions, repair loop | Built; first runs next |
 | Comparison: rules vs LLM vs hybrid, failure analysis | |
 | Review UI and migration package | |
 
@@ -62,6 +62,25 @@ python -m mapwright run benchmark/datasets/D06/source.csv --contract contracts/s
     --reference customer_id=benchmark/reference_customers.csv --out runs/demo
 python -m mapwright replay runs/demo/plan.json benchmark/datasets/D06/source.csv \
     --contract contracts/sales_order.yaml --out runs/demo/replayed.csv
+```
+
+Checking the Gemini key (the LLM systems need one; scoring a recorded run
+does not):
+
+```
+$env:GEMINI_API_KEY = "your-key"     # PowerShell, this terminal only
+python -m mapwright llm-check
+```
+
+Running the LLM systems (L, H, H−). `--record` calls Gemini for anything
+not yet in `llm_cache/` and saves the answers; without it, runs replay the
+cache and need no key:
+
+```
+python -m evaluation baseline llm runs/llm --split dev --record
+python -m evaluation baseline hybrid runs/hybrid --split dev --record
+python -m evaluation baseline hybrid-norepair runs/hybrid-norepair --split dev
+python -m evaluation score runs/hybrid
 ```
 
 The run writes `target.csv`, `result.json`, `plan.json` and `report.md`.

@@ -23,6 +23,8 @@ import yaml
 from .actions import Action, Deduplicate, Effect, Workspace
 
 CONFIG = Path(__file__).resolve().parent / "policy.yaml"
+# Mapping a column fills it from empty, so the share it changes says nothing about risk.
+STRUCTURAL = {"map_column", "combine_columns", "drop_column"}
 
 
 @lru_cache(maxsize=None)
@@ -86,7 +88,11 @@ def decide(action: Action, effect: Effect, ws: Workspace, config: dict | None = 
         return Decision("hold", "the rule could not settle how to read the values", _escalations(action, effect, None))
     if action.origin == "llm" and (action.confidence or 0.0) < config["min_llm_confidence"]:
         return Decision("hold", "low model confidence", _escalations(action, effect, None))
-    if action.origin in config["large_change_origins"] and _changed_share(effect, ws) > config["large_change_share"]:
+    if (
+        action.origin in config["large_change_origins"]
+        and action.type not in STRUCTURAL
+        and _changed_share(effect, ws) > config["large_change_share"]
+    ):
         return Decision("hold", "changes a large share of the column", _escalations(action, effect, None))
 
     flagged = _escalations(action, effect, review)

@@ -13,6 +13,7 @@ min_llm_confidence: 0.8
 
 # An action from one of these origins that changes more than this share of
 # a column's non-null values waits for review. Rules are deterministic
-# dictionary and format conversions, so they are exempt by default.
+# dictionary and format conversions, so they are exempt by default. Column
+# mapping actions are always exempt: they fill a column from empty.
 large_change_share: 0.2
 large_change_origins: [llm]

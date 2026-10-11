@@ -12,7 +12,7 @@ executor and validator. Only the decision-making differs.
 | System | Detection | Mapping and fixes | Repair loop |
 | --- | --- | --- | --- |
 | **R** Rules-only | Deterministic detectors | Synonym dictionaries, header similarity, normalizer tables. Anything ambiguous is escalated. | No |
-| **L** LLM-only | LLM reads profiles and samples | LLM proposes the full action plan in one pass | No |
+| **L** LLM-only | LLM reads profiles and samples | One call for the mapping, then one call for every mapped field's actions | No |
 | **H** Hybrid | Deterministic detectors, then LLM for what rules leave unresolved | Rules first, LLM for semantic issues and unmapped columns | Yes, up to 2 revisions per failed action |
 | **H−** Hybrid without repair | Same as H | Same as H | No |
 
@@ -156,8 +156,12 @@ free tier). Rules-only is the zero-cost reference.
 
 ## Protocol
 
-- Temperature 0. Each LLM system runs 3 times per case; results report the
-  mean and the min–max range.
+- Temperature 0 where the model accepts it. Gemini 3 models deprecate
+  sampling parameters, so with them the default sampling is used and the
+  repeated runs measure the variance. Each LLM system is meant to run 3 times per case
+  (`--sample 0/1/2`, each with its own cache entries); results report the
+  mean and the min–max range. On the free tier the first comparison uses
+  one run, and the report says so.
 - Every LLM request and response is cached by model, prompt version and
   request hash. Re-scoring never calls the API, and anyone can replay a
   published run without an API key.
