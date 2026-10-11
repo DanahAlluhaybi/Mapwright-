@@ -7,6 +7,8 @@ a step for every action, so the plan can be replayed exactly.
 
 from __future__ import annotations
 
+import datetime as dt
+import hashlib
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -30,6 +32,12 @@ from .profile import ColumnProfile, profile_table
 from .validate import postconditions
 
 PLAN_VERSION = 1
+
+
+def _now() -> str:
+    return dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+
+
 STRUCTURAL = {"map_column", "combine_columns", "drop_column"}
 SYSTEMS = ("rules", "hybrid", "llm")
 # Findings an LLM may be asked to resolve: values the rules could not read.
@@ -43,6 +51,9 @@ class Step:
     decision: Decision | None
     status: str  # applied | escalated | failed
     problems: list[str] = field(default_factory=list)
+    input_hash: str = ""
+    output_hash: str = ""
+    at: str = ""
 
     @property
     def committed(self) -> bool:
@@ -72,6 +83,8 @@ class RunOutcome:
     seconds: float
     system: str = "rules"
     session: object | None = None  # LLMSession for LLM systems
+    source_sha256: str = ""
+    started_at: str = ""
 
     @property
     def escalations(self) -> list[dict]:
@@ -173,10 +186,11 @@ class Executor:
         Value actions that would change nothing are not recorded.
         """
         action.id = f"a{len(self.steps) + 1}"
+        before = self.ws.digest()
         try:
             effect = action.compute(self.ws)
         except Exception as error:  # an action that crashes is a failed action, not a failed run
-            step = Step(action, Effect(), None, "failed", [f"{type(error).__name__}: {error}"])
+            step = Step(action, Effect(), None, "failed", [f"{type(error).__name__}: {error}"], before, before, _now())
             self.steps.append(step)
             return step
         if not effect.changes and not effect.removed and action.type not in STRUCTURAL:
@@ -190,6 +204,7 @@ class Executor:
             if decision.committed:
                 self.ws.commit(effect)
             step = Step(action, effect, decision, "applied" if decision.committed else "escalated")
+        step.input_hash, step.output_hash, step.at = before, self.ws.digest(), _now()
         self.steps.append(step)
         return step
 
@@ -238,6 +253,8 @@ def run(
         raise ValueError(f"system {system!r} needs an LLM session")
 
     started = time.perf_counter()
+    started_at = _now()
+    source_sha256 = hashlib.sha256(Path(source_path).read_bytes()).hexdigest()
     source = read_source(source_path)
     profiles = profile_table(source)
     if system == "llm":
@@ -312,6 +329,8 @@ def run(
         time.perf_counter() - started,
         system,
         session,
+        source_sha256,
+        started_at,
     )
 
 

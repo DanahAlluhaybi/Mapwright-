@@ -13,6 +13,8 @@ target.
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import asdict, dataclass, field, fields
 from typing import ClassVar
 
@@ -68,6 +70,11 @@ class Workspace:
             self.rows[change.row][change.field] = change.after
         for number in effect.removed:
             self.rows.pop(number, None)
+
+    def digest(self) -> str:
+        """Hash of the staged table, so the audit log can show what each step changed."""
+        payload = json.dumps([[n, self.rows[n]] for n in sorted(self.rows)], ensure_ascii=False, sort_keys=True)
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     def table(self) -> tuple[list[dict[str, str]], list[int]]:
         numbers = list(self.rows)

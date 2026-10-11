@@ -83,7 +83,7 @@ python -m evaluation baseline hybrid-norepair runs/hybrid-norepair --split dev
 python -m evaluation score runs/hybrid
 ```
 
-The run writes `target.csv`, `result.json`, `plan.json` and `report.md`.
+The run writes `target.csv`, `result.json`, `plan.json`, `report.md` and `audit.jsonl`.
 `report.md` lists what was fixed, what was applied but needs sign-off, and
 what is held for approval.
 

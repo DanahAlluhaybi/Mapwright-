@@ -169,10 +169,14 @@ For each run, `<out>/`:
   `python -m mapwright replay` re-applies it to the source file, and can
   apply held actions once they are approved
 - `report.md`: what was found, fixed, flagged and held
+- `audit.jsonl`: one event per line, in order: run start (source file
+  hash, ingest settings, system, model), every action (actor, decision,
+  reason, cells and rows touched, staged-table hash before and after,
+  timestamp), every model call (prompt version, tokens, cache hit),
+  invalid proposals, escalations, and run end (target hash)
 
-Still to come: `audit.jsonl`, an append-only log with one event per step
-(actor, action, input and output hashes, model and prompt version, tokens,
-timestamp), and an optional SQL export of the plan.
+Still to come: reviewer decisions appended to the audit log by the
+review UI, and an optional SQL export of the plan.
 
 ## Stack
 

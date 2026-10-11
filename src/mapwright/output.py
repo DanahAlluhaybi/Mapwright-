@@ -4,6 +4,7 @@
 <out>/result.json    mapping, detections, actions, escalations, usage
 <out>/plan.json      every step with its parameters, decision and effect
 <out>/report.md      what was fixed, flagged and held, for a person to read
+<out>/audit.jsonl    one event per step: actor, decision, table hashes, model calls
 """
 
 from __future__ import annotations
@@ -13,6 +14,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
+from .audit import write_audit
 from .pipeline import RunOutcome
 
 SOURCE_ROW = "_source_row"
@@ -89,4 +91,5 @@ def write_run(outcome: RunOutcome, directory: str | Path) -> Path:
     _json(directory / "result.json", outcome.result())
     _json(directory / "plan.json", outcome.plan())
     (directory / "report.md").write_text(report(outcome), encoding="utf-8")
+    write_audit(outcome, directory / "audit.jsonl")
     return directory
