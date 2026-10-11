@@ -213,6 +213,7 @@ class SetNull(_Classify, Action):
     tokens: list[str] = field(default_factory=list)
     rows: list[int] = field(default_factory=list)
     issue: str | None = "V3"
+    ambiguous: bool = False  # set when a token looks like real data, not a placeholder
 
     def compute(self, ws: Workspace) -> Effect:
         tokens = {match_key(t) for t in self.tokens}
@@ -275,7 +276,9 @@ class ParseNumber(Action):
         parsed = parse_number(before.strip(), self.units)
         if parsed is not None and parsed.embedded_unit:
             return "V4"
-        return "S1" if parsed is not None and parsed.separators else self.issue
+        if parsed is not None and parsed.separators:
+            return "S1"
+        return self.issue or "S9"
 
     def compute(self, ws: Workspace) -> Effect:
         effect = Effect()

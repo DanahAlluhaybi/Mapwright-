@@ -337,3 +337,11 @@ def validation_findings(ctx: Context, f: Field | None) -> Iterator[Finding]:
             orphans = [n for n, v in ws.values(field_.name).items() if v and v not in allowed]
             if orphans:
                 yield Finding("S7", field_.name, orphans, note=f"not found in {field_.foreign_key}")
+        if field_.unique:
+            by_value: dict[str, list[int]] = defaultdict(list)
+            for n, v in ws.values(field_.name).items():
+                if v.strip():
+                    by_value[v].append(n)
+            groups = [rows for rows in by_value.values() if len(rows) > 1]
+            if groups:
+                yield Finding("S8", field_.name, groups=groups, note="the same key on several rows")

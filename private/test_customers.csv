@@ -1,0 +1,63 @@
+Customer Number,Customer Name,Email Address,Mobile,Country,City,Customer Type,Registration Date,Credit Limit,Status
+CUS-1001,  mohammed aldosari ,Mohammed.Aldosari84@gmail.com,0581590830,SA,Khobar,Individual,14/07/2013,,Active
+CUS-1002,Faisal Alharbi,Faisal.Alharbi29@gmail.com,+962791112233,UAE,Dubai,Person,19/11/2015,"SAR 13,000",Y
+CUS-1003,Ali Alshehri,Ali.Alshehri47@outlook.com,966523194875,Saudi,Madinah,Person,10/10/2013,267000,N
+CUS-1004,Turki Almutairi,Turki.Almutairi44@hotmail.com,+97433112233,Jordan,Amman,B2C,21/10/2022,233000,Y
+CUS-1005,  gulf star logistics ,info@gulfstarlogistics.com,00966 53 667 1276,KSA,Makkah,Business,05/07/2025,7K,N
+CUS-1006,Hessa Alzahrani,Hessa.Alzahrani34@outlook.com,0568599528,SA,Dammam,Individual,15/11/2024,7K,Y
+CUS-1007,  sara almutairi ,Sara.Almutairi77@gmail.com,+966592815901,KSA,Jeddah,Individual,20/07/2014,134000,No
+CUS-1008,Sara Alzahrani,Sara.Alzahrani14@hotmail.com,+966547280385,KSA,Makkah,B2C,23/09/2012,,نعم
+CUS-1009,Desert Rose Hotels,info@desertrosehotels.com,+97433112233,Bahrain,Manama,B2B,24/01/2012,"409,000.00",نعم
+CUS-1010,Reem Alotaibi,Reem.Alotaibi29@gmail.com,+971501234567,Qatar,Doha,Person,27/11/2013,"470,000.00",No
+CUS-1011,Faisal Alotaibi,Faisal.Alotaibi93@gmail.com,00966 50 297 2997,SA,Dammam,Person,05/09/2020,,Active
+CUS-1012,  ahmed alqahtani ,Ahmed.Alqahtani28@outlook.com,966595486205,Saudi,Madinah,Person,22/10/2025,"467,000.00",Active
+CUS-1013,TURKI ALZAHRANI,Turki.Alzahrani23@gmail.com,+962791112233,Jordan,Amman,فرد,02/04/2015,2K,Active
+CUS-1014,HESSA HADDAD,Hessa.Haddad26@hotmail.com,00201012345678,Qatar,Doha,B2C,05/07/2013,"205,000.00",No
+CUS-1015,Bright Path Schools,+966542731672,,SA,Dammam,B2B,06/12/2018,"268,000.00",Yes
+CUS-1016,Ahmed Aldosari,Ahmed.Aldosari43@hotmail.com,+97433112233,Egypt,Cairo,B2C,25/03/2025,"221,000.00",Active
+CUS-1017,  bright path schools ,info@brightpathschools.com,+97433112233,Kuwait,Kuwait City,Business,28/02/2019,178000,Active
+CUS-1018,Red Sea Trading,info@redseatrading.com,00966 54 483 4782,السعودية,جدة,Business,12/01/2016,"SAR 69,000",N
+CUS-1019,YOUSEF ALSHEHRI,Yousef.Alshehri70@outlook.com,+966533532650,KSA,Makkah,B2C,01/02/2022,"384,000.00",Y
+CUS-1020,NAJD FOODS CO.,info@najdfoodsco.com,00966 57 224 7045,KSA,Jeddah,B2B,18/06/2015,499000,N
+CUS-1006,Hessa Alzahrani,Hessa.Alzahrani34@outlook.com,0568599528,SA,Dammam,Individual,15/11/2024,7K,Y
+CUS-1021,Desert Rose Hotels,info@desertrosehotels.com,00966 54 126 9060,Saudi Arabia,Riyadh,Company,10/11/2015,"SAR 24,000",No
+CUS-1022,MOHAMMED ALHARBI,-,0582889093,KSA,Makkah,,01/01/2014,2K,Active
+CUS-1023,Dana Haddad,-,966574143337,KSA,Makkah,Individual,28/07/2013,"SAR 10,000",نعم
+CUS-1024,Hessa Mansour,,966574137484,KSA,Jeddah,فرد,15/08/2024,462000,Y
+CUS-1025,KHALID ALDOSARI,Khalid.Aldosari27@gmail.com,+971501234567,Jordan,Amman,Individual,23/06/2015,,N
+CUS-1026,Gulf Star Logistics,+97433112233,,United Arab Emirates,Abu Dhabi,شركة,09/06/2013,2K,Yes
+CUS-1027,MOHAMMED ALGHAMDI,Mohammed.Alghamdi35@outlook.com,0556068831,السعودية,جدة,B2C,24/07/2019,390000,No
+CUS-1028,Khalid Alqahtani,Khalid.Alqahtani95@hotmail.com,+96550012345,Kuwait,Kuwait City,B2C,17/08/2020,6K,N
+CUS-1029,Reem Alqahtani,Reem.Alqahtani73@gmail.com,0566683645,KSA,Makkah,Individual,16/05/2021,"SAR 69,000",نعم
+CUS-1030,  yousef alshehri ,Yousef.Alshehri56@outlook.com,966506797016,SA,Dammam,Individual,15/04/2024,"SAR 24,000",نعم
+CUS-1031,Sara Haddad,unknown,0590424861,السعودية,جدة,Person,03/05/2020,303000,N
+CUS-1032,Maha Alghamdi,Maha.Alghamdi61@hotmail.com,+971501234567,Egypt,Cairo,Person,09/04/2022,6K,Y
+CUS-1033,GULF STAR LOGISTICS,info@gulfstarlogistics.com,00966 57 343 3734,السعودية,جدة,Company,04/10/2019,4K,نعم
+CUS-1034,Desert Rose Hotels,info@desertrosehotels.com,+97433112233,Kuwait,Kuwait City,Business,07/03/2022,273000,نعم
+CUS-1035,Red Sea Trading,info@redseatrading.com,966556183654,Saudi Arabia,Riyadh,B2B,03/01/2023,6K,N
+CUS-1036,Bright Path Schools,info@brightpathschools.com,00966 56 071 0431,KSA,Jeddah,شركة,12/05/2017,493000,Yes
+CUS-1037,Sara Alharbi,Sara.Alharbi30@gmail.com,0576467272,KSA,Makkah,فرد,26/12/2016,"426,000.00",Yes
+CUS-1038,  faisal alzahrani ,Faisal.Alzahrani32@outlook.com,+97433112233,Bahrain,Manama,Individual,20/02/2015,"54,000.00",N
+CUS-1039,Turki Alotaibi,Turki.Alotaibi38@outlook.com,+96550012345,Jordan,Amman,B2C,05/05/2021,172000,N
+CUS-1013,TURKI ALZAHRANI,Turki.Alzahrani23@gmail.com,+962791112233,Jordan,Amman,فرد,02/04/2015,2K,Active
+CUS-1040,Sara Alharbi,Sara.Alharbi61@gmail.com,+971501234567,United Arab Emirates,Abu Dhabi,,12/09/2025,,Y
+CUS-1041,Ahmed Alghamdi,Ahmed.Alghamdi33@gmail.com,+966505652941,SA,Khobar,Person,02/08/2020,7K,نعم
+CUS-1042,Faisal Alqahtani,Faisal.Alqahtani86@outlook.com,966549566053,KSA,Jeddah,فرد,24/07/2015,7K,Y
+CUS-1043,Red Sea Trading,info@redseatrading.com,+97433112233,Egypt,Cairo,Company,10/03/2020,2K,No
+CUS-1044,  ahmed alshehri ,Ahmed.Alshehri41@gmail.com,+966592396937,Saudi Arabia,Riyadh,فرد,19/04/2012,9K,Yes
+CUS-1045,DESERT ROSE HOTELS,info@desertrosehotels.com,+962791112233,Bahrain,Manama,Company,08/07/2018,8K,N
+CUS-1046,Turki Alshehri,Turki.Alshehri23@outlook.com,0512565178,Saudi Arabia,Riyadh,فرد,02/11/2014,,Y
+CUS-1047,Red Sea Trading,info@redseatrading.com,00966 52 742 3159,السعودية,جدة,Company,06/06/2021,468000,Active
+CUS-1048,Gulf Star Logistics,info@gulfstarlogistics.com,0526245624,السعودية,جدة,Company,25/09/2012,"SAR 62,000",Active
+CUS-1049,  faisal almutairi ,Faisal.Almutairi34@outlook.com,+97433112233,Jordan,Amman,B2C,27/09/2016,,N
+CUS-1050,  mohammed alshehri ,-,+966500954185,KSA,Jeddah,Individual,14/10/2016,"SAR 51,000",No
+CUS-1051,  najd foods co. ,info@najdfoodsco.com,+96550012345,Kuwait,Kuwait City,B2B,06/01/2012,"36,000.00",N
+CUS-1052,Noura Alzahrani,Noura.Alzahrani53@gmail.com,0592841407,SA,Khobar,,13/07/2023,2K,N
+CUS-1053,Dana Alqahtani,Dana.Alqahtani92@gmail.com,+96550012345,Bahrain,Manama,B2C,09/04/2025,"385,000.00",No
+CUS-1054,Yousef Haddad,0506394369,,SA,Khobar,,19/03/2014,"SAR 18,000",N
+CUS-1055,YOUSEF ALHARBI,-,+966595381613,Saudi Arabia,Riyadh,Individual,07/02/2012,491000,No
+CUS-1056,Gulf Star Logistics,info@gulfstarlogistics.com,00201012345678,UAE,Dubai,B2B,01/07/2020,,Active
+CUS-1057,Al Noor Clinics,info@alnoorclinics.com,00201012345678,Egypt,Cairo,Company,19/06/2025,"268,000.00",نعم
+CUS-1058,Dana Haddad,Dana.Haddad14@hotmail.com,+97433112233,United Arab Emirates,Abu Dhabi,,14/09/2020,"92,000.00",Active
+CUS-1059,Omar Alzahrani,Omar.Alzahrani58@hotmail.com,+966577493257,SA,Dammam,B2C,17/04/2016,"159,000.00",نعم
+CUS-1060,BRIGHT PATH SCHOOLS,info@brightpathschools.com,00966 51 362 2446,SA,Dammam,Company,07/02/2022,5K,No

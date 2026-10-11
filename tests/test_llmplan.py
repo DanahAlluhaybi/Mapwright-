@@ -226,3 +226,44 @@ class SystemsTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SafetyTest(unittest.TestCase):
+    def test_blanking_values_that_look_like_data_is_held(self):
+        f = CUSTOMER.field("email")
+        values = ["N/A", "+966542731672"]
+        action = build_action(
+            CUSTOMER, f, {"type": "set_null", "tokens": values, "confidence": 0.9}, values, ["set_null"]
+        )
+        self.assertTrue(action.ambiguous)
+        placeholder = build_action(
+            CUSTOMER, f, {"type": "set_null", "tokens": ["N/A"], "confidence": 0.9}, values, ["set_null"]
+        )
+        self.assertFalse(placeholder.ambiguous)
+
+    def test_a_held_action_is_not_sent_back_for_revision(self):
+        source = "id,signup\n" + "".join(f"C-{n},2{n}/01/2011\n" for n in range(1, 8))
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "dates.csv"
+            path.write_text(source, encoding="utf-8")
+
+            def date_answers(request):
+                body = json.loads(request.prompt)
+                if request.prompt_version.startswith("map"):
+                    return {"mappings": [{"source": ["signup"], "target": "signup_date", "confidence": 0.9}]}
+                return per_field(
+                    body,
+                    lambda name: (
+                        [{"type": "parse_date", "formats": ["%d/%m/%Y"], "confidence": 0.9}]
+                        if name == "signup_date"
+                        else []
+                    ),
+                )
+
+            provider = FakeProvider(date_answers)
+            outcome = run(path, CUSTOMER, system="llm", session=LLMSession(provider))
+        self.assertNotIn("revise-v1", [r.prompt_version for r in provider.requests])
+        held = [s for s in outcome.steps if s.action.type == "parse_date"]
+        self.assertEqual([s.status for s in held], ["escalated"])
+        keys = [json.dumps({k: v for k, v in e.items() if k != "action"}, sort_keys=True) for e in outcome.escalations]
+        self.assertEqual(len(keys), len(set(keys)))

@@ -86,3 +86,12 @@ class PolicyTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PolicyVariantTest(unittest.TestCase):
+    def test_sensitivity_policy_differs_only_in_the_share_rule(self):
+        variant = yaml.safe_load((ROOT / "evaluation" / "policies" / "no-share-limit.yaml").read_text("utf-8"))
+        base = dict(load_config())
+        self.assertEqual(variant.pop("large_change_origins"), [])
+        base.pop("large_change_origins")
+        self.assertEqual(variant, base)

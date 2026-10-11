@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import datetime as dt
 import hashlib
+import json
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -97,7 +98,13 @@ class RunOutcome:
                 elif finding.rows is not None:
                     item["rows"] = finding.rows
                 items.append(item)
-        return items
+        unique, seen = [], set()
+        for item in items:
+            key = json.dumps({k: v for k, v in item.items() if k != "action"}, sort_keys=True)
+            if key not in seen:
+                seen.add(key)
+                unique.append(item)
+        return unique
 
     def detections(self) -> list[dict]:
         return collect_detections(self)

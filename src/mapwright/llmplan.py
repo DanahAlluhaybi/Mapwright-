@@ -27,7 +27,16 @@ from .dictionaries import unit_tokens, value_dictionary
 from .ingest import SourceTable
 from .llm import LLMError, LLMRequest, Provider, Usage, prompts
 from .mapping import ColumnMapping, MappingResult, _mapping_issue
-from .normalize import FORMATS_BY_PATTERN, _swap_day_month, match_key, parse_date
+from .normalize import (
+    DATE_FORMATS,
+    FORMATS_BY_PATTERN,
+    _swap_day_month,
+    is_email,
+    match_key,
+    normalize_phone,
+    parse_date,
+    parse_number,
+)
 from .profile import ColumnProfile
 
 FORMAT_RULES = {"type", "pattern", "allowed_values", "reference"}
@@ -240,7 +249,11 @@ def build_action(contract: Contract, f: Field, item: object, values: list[str], 
         missing = [t for t in tokens if t not in shown]
         if missing:
             return Invalid(kind, f.name, f"tokens {missing} were not in the values shown")
-        return SetNull(target=f.name, tokens=[shown[t].strip() for t in tokens], **meta)
+        cleaned = [shown[t].strip() for t in tokens]
+        # Blanking a value that reads as a phone, an email, a number or a date
+        # loses data, so a person decides; placeholders like "N/A" are blanked.
+        real = [t for t in cleaned if looks_like_data(t)]
+        return SetNull(target=f.name, tokens=cleaned, ambiguous=bool(real), **meta)
 
     if kind == "parse_date":
         formats = item.get("formats")
@@ -277,6 +290,15 @@ def build_action(contract: Contract, f: Field, item: object, values: list[str], 
     return NormalizePhone(target=f.name, **meta)
 
 
+def looks_like_data(text: str) -> bool:
+    return (
+        is_email(text.lower())
+        or normalize_phone(text) is not None
+        or parse_number(text) is not None
+        or any(parse_date(text, f.pattern) for f in DATE_FORMATS)
+    )
+
+
 def still_wrong(contract: Contract, f: Field, ws: Workspace, rows: list[int] | None) -> dict[int, str]:
     """Rows (among ``rows``, or all) whose value still breaks a format rule."""
     values = ws.values(f.name)
@@ -298,9 +320,15 @@ def _coverage_gaps(action: Action, wrong: dict[int, str], values: list[str]) -> 
 
 
 def _needs_revision(action: Action, step, wrong: dict[int, str], values: list[str]) -> list[str]:
-    """Why a run action should be revised, or nothing if it did its job."""
+    """Why a run action should be revised, or nothing if it did its job.
+
+    A held action is not a failure: it waits for a person, and asking the
+    model again would only propose it again.
+    """
     if step.status == "failed":
         return step.problems
+    if step.status == "escalated":
+        return []
     return _coverage_gaps(action, wrong, values)
 
 

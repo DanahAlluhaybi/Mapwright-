@@ -35,6 +35,8 @@ def write_baseline(name: str, run_dir: Path, split: str | None = None, cases: li
     info = {"system": name, "date": dt.date.today().isoformat()}
     if name in LLM_SYSTEMS:
         info |= {"model": LLMSettings.provider().model, "sample": LLMSettings.sample}
+        if LLMSettings.policy is not None:
+            info["policy"] = LLMSettings.policy
     for case in load_cases():
         if (split is None or case.split == split) and (not cases or case.id in cases):
             print(f"{name}: {case.id}", flush=True)
@@ -98,6 +100,7 @@ def main(argv: list[str] | None = None) -> int:
     baseline.add_argument("--record", action="store_true", help="LLM systems: call Gemini for uncached requests")
     baseline.add_argument("--model", default="", help="LLM systems: model id (default gemini-3.8-flash)")
     baseline.add_argument("--sample", type=int, default=0, help="LLM systems: repeat number for repeated runs")
+    baseline.add_argument("--policy", type=Path, help="LLM systems: a policy file to use instead of policy.yaml")
 
     score_cmd = commands.add_parser("score", help="score a run")
     score_cmd.add_argument("run_dir", type=Path)
@@ -109,6 +112,10 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "baseline":
         LLMSettings.record, LLMSettings.model, LLMSettings.sample = args.record, args.model, args.sample
+        if args.policy:
+            import yaml
+
+            LLMSettings.policy = yaml.safe_load(args.policy.read_text("utf-8"))
         write_baseline(args.name, args.run_dir, args.split, args.cases)
     elif args.command == "score":
         score(args.run_dir, args.out or ROOT / "results" / args.run_dir.name)

@@ -119,6 +119,7 @@ class LLMSettings:
     record = False
     model = ""
     sample = 0
+    policy: dict | None = None  # None = src/mapwright/policy.yaml
     _provider = None
 
     @classmethod
@@ -138,7 +139,9 @@ def _llm_system(system: str, repair: bool):
     def run_case(case: BenchmarkCase, directory: Path) -> None:
         session = LLMSession(LLMSettings.provider(), sample=LLMSettings.sample, repair=repair)
         source = DATASETS / case.id / "source.csv"
-        outcome = run(source, case.contract, _references(case), system=system, session=session)
+        outcome = run(
+            source, case.contract, _references(case), policy_config=LLMSettings.policy, system=system, session=session
+        )
         write_run(outcome, directory)
 
     return run_case
