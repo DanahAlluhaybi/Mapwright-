@@ -72,6 +72,10 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "llm-check":
         return llm_check(args.model)
+    for path in [getattr(args, "source", None), getattr(args, "plan", None), args.contract]:
+        if path is not None and not Path(path).is_file():
+            print(f"File not found: {path}")
+            return 2
     contract = load_contract(args.contract)
     if args.command == "run":
         outcome = run(args.source, contract, dict(args.reference))
