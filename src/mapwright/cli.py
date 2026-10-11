@@ -58,6 +58,13 @@ def main(argv: list[str] | None = None) -> int:
     run_cmd.add_argument("--contract", type=Path, required=True)
     run_cmd.add_argument("--out", type=Path, required=True)
     run_cmd.add_argument("--reference", type=load_reference, action="append", default=[])
+    run_cmd.add_argument(
+        "--system",
+        choices=["rules", "hybrid", "llm"],
+        default="rules",
+        help="rules only (default), rules then the model for what they leave (hybrid), or the model only (llm)",
+    )
+    run_cmd.add_argument("--model", help="model for hybrid/llm; defaults to $MAPWRIGHT_MODEL or gemini-3.8-flash")
 
     replay_cmd = commands.add_parser("replay", help="apply a saved plan to a source file")
     replay_cmd.add_argument("plan", type=Path)
@@ -78,9 +85,28 @@ def main(argv: list[str] | None = None) -> int:
             return 2
     contract = load_contract(args.contract)
     if args.command == "run":
-        outcome = run(args.source, contract, dict(args.reference))
+        session = None
+        if args.system != "rules":
+            from .llm import CachedProvider, LLMError
+            from .llm.gemini import GeminiProvider
+            from .llmplan import LLMSession
+
+            try:
+                session = LLMSession(CachedProvider(Path("llm_cache"), GeminiProvider(args.model)))
+            except LLMError as error:
+                print(error)
+                return 1
+        try:
+            outcome = run(args.source, contract, dict(args.reference), system=args.system, session=session)
+        except Exception as error:
+            if type(error).__name__ not in ("LLMError", "CacheMiss"):
+                raise
+            print(f"Stopped: {error}")
+            return 1
         write_run(outcome, args.out)
         held = sum(1 for s in outcome.steps if s.status == "escalated")
+        if session is not None:
+            print(f"{session.usage.llm_calls} model calls ({session.usage.cached_calls} from the cache)")
         print(
             f"{len(outcome.rows)} rows written to {args.out / 'target.csv'}; "
             f"{held} actions held, {len(outcome.escalations)} items need review"

@@ -1,0 +1,18 @@
+{
+  "request": {
+    "prompt": "{\n \"task\": \"Each entry below is one target field with values from the source column that feeds it. For each field, propose actions, chosen only from that field's allowed action types, that turn its values into the field's canonical form. Keys of map_values and set_null tokens must be copied exactly from that field's values. Map a value only when you are confident what it means; list the rest under unresolved. Leave a field's actions empty when its values are already canonical.\",\n \"fields\": [\n  {\n   \"field\": {\n    \"name\": \"phone\",\n    \"type\": \"string\",\n    \"required\": false,\n    \"canonical_form\": \"E.164 with no spaces, for example +966501234567. Local Saudi mobile formats (05XXXXXXXX, 5XXXXXXXX, 9665XXXXXXXX, 00966...) normalize to +9665XXXXXXXX.\",\n    \"pattern\": \"^\\\\+[1-9][0-9]{7,14}$\"\n   },\n   \"context\": \"source column(s) ['Mobile']\",\n   \"values\": [\n    \"971501112233\"\n   ],\n   \"allowed_actions\": {\n    \"set_null\": {\n     \"tokens\": [\n      \"<value exactly as shown that stands for a missing value>\"\n     ]\n    },\n    \"normalize_phone\": {}\n   }\n  },\n  {\n   \"field\": {\n    \"name\": \"credit_limit\",\n    \"type\": \"decimal\",\n    \"required\": false,\n    \"canonical_form\": \"Plain decimal in SAR, two places, no separators or symbols.\",\n    \"range\": [\n     0,\n     1000000\n    ]\n   },\n   \"context\": \"source column(s) ['Credit']\",\n   \"values\": [\n    \"abc\"\n   ],\n   \"allowed_actions\": {\n    \"set_null\": {\n     \"tokens\": [\n      \"<value exactly as shown that stands for a missing value>\"\n     ]\n    },\n    \"parse_number\": {\n     \"units\": {\n      \"<currency token as written, e.g. SR>\": \"<ISO code>\"\n     }\n    }\n   }\n  }\n ],\n \"answer_schema\": {\n  \"fields\": {\n   \"<field name>\": {\n    \"actions\": [\n     {\n      \"type\": \"<allowed action>\",\n      \"...\": \"parameters\",\n      \"confidence\": \"0..1\",\n      \"reason\": \"<short>\"\n     }\n    ],\n    \"unresolved\": [\n     \"<value>\"\n    ]\n   }\n  }\n }\n}",
+    "system": "You help migrate messy legacy data exports into a fixed target schema.\nYou never write code, SQL or formulas. You answer with one JSON object that\nfollows the schema given in the request, and nothing else.\nWhen you are not sure, say so with a low confidence or leave the item out:\na person reviews uncertain items, and an invented answer is worse than none.",
+    "model": "gemini-3.1-flash-lite",
+    "prompt_version": "values-v2",
+    "temperature": 0.0,
+    "json_output": true,
+    "sample": 0
+  },
+  "response": {
+    "text": "{\n \"fields\": {\n  \"phone\": {\n   \"actions\": [\n    {\n     \"type\": \"normalize_phone\",\n     \"confidence\": 0.9,\n     \"reason\": \"Value is likely a valid international number missing the leading plus sign.\"\n    }\n   ],\n   \"unresolved\": []\n  },\n  \"credit_limit\": {\n   \"actions\": [\n    {\n     \"type\": \"set_null\",\n     \"tokens\": [\n      \"abc\"\n     ],\n     \"confidence\": 1.0,\n     \"reason\": \"Value 'abc' is not a valid number and cannot be parsed.\"\n    }\n   ],\n   \"unresolved\": []\n  }\n }\n}",
+    "model": "gemini-3.1-flash-lite",
+    "input_tokens": 705,
+    "output_tokens": 167,
+    "cached": false
+  }
+}

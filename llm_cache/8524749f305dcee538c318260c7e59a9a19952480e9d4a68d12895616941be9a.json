@@ -1,0 +1,18 @@
+{
+  "request": {
+    "prompt": "{\n \"task\": \"Decide which target field each source column carries. A target field may be built from several source columns (for example first and last name), listed in reading order. Each source column is used at most once and each target field at most once. Columns that carry none of the open fields are dropped. Only use the open fields.\",\n \"target_entity\": \"customer\",\n \"open_fields\": [\n  {\n   \"name\": \"customer_id\",\n   \"type\": \"string\",\n   \"required\": true,\n   \"canonical_form\": \"Source identifier, trimmed and upper-cased. Never re-generated.\",\n   \"pattern\": \"^[A-Z0-9-]{3,20}$\"\n  }\n ],\n \"already_mapped\": {\n  \"full_name\": [\n   \"Customer Name\"\n  ],\n  \"email\": [\n   \"E-mail\"\n  ],\n  \"phone\": [\n   \"Mobile\"\n  ],\n  \"country_code\": [\n   \"Country\"\n  ],\n  \"city\": [\n   \"City\"\n  ],\n  \"customer_type\": [\n   \"Type\"\n  ],\n  \"signup_date\": [\n   \"Joined\"\n  ],\n  \"credit_limit\": [\n   \"Credit\"\n  ],\n  \"is_active\": [\n   \"Active\"\n  ]\n },\n \"source_columns\": [\n  {\n   \"column\": \"Client No\",\n   \"rows\": 8,\n   \"blank\": 0,\n   \"distinct\": 7,\n   \"shapes\": [\n    \"A-9\"\n   ],\n   \"values\": [\n    \"c-2001 \",\n    \"C-2002\",\n    \"C-2003\",\n    \"C-2004\",\n    \"C-2005\",\n    \"C-2006\",\n    \"C-2007\"\n   ]\n  }\n ],\n \"answer_schema\": {\n  \"mappings\": [\n   {\n    \"source\": [\n     \"<column>\"\n    ],\n    \"target\": \"<open field>\",\n    \"confidence\": \"0..1\",\n    \"reason\": \"<short>\"\n   }\n  ],\n  \"drop\": [\n   \"<column>\"\n  ]\n }\n}",
+    "system": "You help migrate messy legacy data exports into a fixed target schema.\nYou never write code, SQL or formulas. You answer with one JSON object that\nfollows the schema given in the request, and nothing else.\nWhen you are not sure, say so with a low confidence or leave the item out:\na person reviews uncertain items, and an invented answer is worse than none.",
+    "model": "gemini-3.1-flash-lite",
+    "prompt_version": "map-v1",
+    "temperature": 0.0,
+    "json_output": true,
+    "sample": 0
+  },
+  "response": {
+    "text": "{\n  \"mappings\": [\n    {\n      \"source\": [\n        \"Client No\"\n      ],\n      \"target\": \"customer_id\",\n      \"confidence\": 1.0,\n      \"reason\": \"Matches the pattern and purpose of a customer identifier.\"\n    }\n  ],\n  \"drop\": []\n}",
+    "model": "gemini-3.1-flash-lite",
+    "input_tokens": 618,
+    "output_tokens": 75,
+    "cached": false
+  }
+}
