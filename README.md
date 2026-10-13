@@ -34,7 +34,8 @@ cases frozen.
 | Rules-only baseline (system R) | Done |
 | LLM layer: Gemini provider, cache, mapping, value actions, repair loop | Built; first runs next |
 | Comparison: rules vs LLM vs hybrid, failure analysis | |
-| Review UI and migration package | |
+| Local API and n8n review workflow (`docs/N8N.md`) | Done |
+| Migration package | |
 
 ## Getting started
 
@@ -83,9 +84,24 @@ python -m evaluation baseline hybrid-norepair runs/hybrid-norepair --split dev
 python -m evaluation score runs/hybrid
 ```
 
+With a Gemini key set, the same command can use the model for what the
+rules leave (`--system hybrid`) or for everything (`--system llm`):
+
+```
+python -m mapwright run examples/messy_customers.csv --contract contracts/customer.yaml --out runs/example-hybrid --system hybrid
+```
+
 The run writes `target.csv`, `result.json`, `plan.json`, `report.md` and `audit.jsonl`.
 `report.md` lists what was fixed, what was applied but needs sign-off, and
 what is held for approval.
+
+## Running it from n8n
+
+`python -m mapwright serve` starts a small local API. The n8n workflow in
+`n8n/mapwright-review.json` puts a form in front of it: upload a CSV, see
+what was held back, approve or reject, and the decision is written to the
+run's audit log with the reviewer's name. Setup and the API reference are
+in [docs/N8N.md](docs/N8N.md).
 
 ## First results: rules only
 
@@ -115,3 +131,4 @@ its key. That is the gap the LLM layer has to close.
 - [Architecture](docs/ARCHITECTURE.md): pipeline, what is code and what is LLM, actions, validation, approval policy
 - [Benchmark](docs/BENCHMARK.md): target schema, the 12 cases, ground truth format, held-out rules
 - [Evaluation](docs/EVALUATION.md): systems compared, hypotheses, metrics, protocol
+- [n8n](docs/N8N.md): local API and the review workflow

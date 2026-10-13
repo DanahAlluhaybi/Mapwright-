@@ -5,6 +5,7 @@
         --reference customer_id=benchmark/reference_customers.csv --out runs/demo
     python -m mapwright replay runs/demo/plan.json SOURCE --contract ... --out replayed.csv
     python -m mapwright llm-check          one tiny Gemini request, to check the API key works
+    python -m mapwright serve              local HTTP API for n8n and other tools (docs/N8N.md)
 """
 
 from __future__ import annotations
@@ -76,9 +77,29 @@ def main(argv: list[str] | None = None) -> int:
     check_cmd = commands.add_parser("llm-check", help="send one tiny request to Gemini")
     check_cmd.add_argument("--model", help="defaults to $MAPWRIGHT_MODEL or gemini-3.8-flash")
 
+    serve_cmd = commands.add_parser("serve", help="local HTTP API for n8n and other tools")
+    serve_cmd.add_argument("--host", default="127.0.0.1")
+    serve_cmd.add_argument("--port", type=int, default=8765)
+    serve_cmd.add_argument("--runs", type=Path, default=Path("runs/api"), help="where API runs are kept")
+    serve_cmd.add_argument("--reference", type=load_reference, action="append", default=[])
+    serve_cmd.add_argument("--model", help="model for hybrid/llm runs")
+
     args = parser.parse_args(argv)
     if args.command == "llm-check":
         return llm_check(args.model)
+    if args.command == "serve":
+        import os
+
+        from .server import Settings, serve
+
+        settings = Settings(
+            runs_dir=args.runs,
+            references=dict(args.reference),
+            model=args.model,
+            token=os.environ.get("MAPWRIGHT_API_TOKEN") or None,
+        )
+        serve(settings, args.host, args.port)
+        return 0
     for path in [getattr(args, "source", None), getattr(args, "plan", None), args.contract]:
         if path is not None and not Path(path).is_file():
             print(f"File not found: {path}")

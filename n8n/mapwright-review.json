@@ -1,0 +1,249 @@
+{
+  "name": "Mapwright: upload, review, approve",
+  "nodes": [
+    {
+      "id": "d0251352-bd60-421c-a79e-541a5e84f73c",
+      "name": "Upload file",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "d0771150-c8ba-46a3-9e0a-340b565167aa",
+      "parameters": {
+        "formTitle": "Mapwright: onboard a file",
+        "formDescription": "Upload a CSV export. Mapwright cleans it against the contract and shows you what needs approval.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "CSV file",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".csv",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Contract",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "customer"
+                  },
+                  {
+                    "option": "sales_order"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "System",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "rules"
+                  },
+                  {
+                    "option": "hybrid"
+                  },
+                  {
+                    "option": "llm"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      }
+    },
+    {
+      "id": "bb73399b-9390-4b72-b5c2-26d68257281a",
+      "name": "Start run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8765/runs",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "contract",
+              "value": "={{ $json.Contract }}"
+            },
+            {
+              "name": "system",
+              "value": "={{ $json.System }}"
+            },
+            {
+              "name": "filename",
+              "value": "={{ $binary.CSV_file.fileName }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "CSV_file",
+        "options": {
+          "timeout": 600000
+        }
+      }
+    },
+    {
+      "id": "81f21986-48d7-4c21-99f2-30ccef089958",
+      "name": "Review",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        480,
+        0
+      ],
+      "webhookId": "9ce63cd6-df4f-498d-b3e1-d7a3be48e088",
+      "parameters": {
+        "operation": "page",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Decision",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Approve all held actions"
+                  },
+                  {
+                    "option": "Approve only the ids below"
+                  },
+                  {
+                    "option": "Keep held actions out"
+                  },
+                  {
+                    "option": "Reject the run"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Ids",
+              "fieldType": "text",
+              "placeholder": "a17, a20"
+            },
+            {
+              "fieldLabel": "Reviewer",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "Your name, for the audit log"
+            },
+            {
+              "fieldLabel": "Note",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {
+          "formTitle": "Review the run",
+          "formDescription": "={{ $json.summary_text }}<br><br>{{ $json.review_text.split('\\n').join('<br>') }}",
+          "buttonLabel": "Send decision"
+        }
+      }
+    },
+    {
+      "id": "b89b39b0-43aa-482b-a6fd-f665edcbda9d",
+      "name": "Send decision",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'http://127.0.0.1:8765/runs/' + $('Start run').item.json.id + '/review' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ decision: $json.Decision === 'Reject the run' ? 'reject' : 'approve', approve: $json.Decision === 'Approve all held actions' ? 'all' : ($json.Decision === 'Approve only the ids below' ? ($json.Ids || '') : []), reviewer: $json.Reviewer, note: $json.Note || '' }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "e079c34b-c994-417a-bf68-ddc9a52754ae",
+      "name": "Done",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        960,
+        0
+      ],
+      "webhookId": "8f39185e-db2a-428c-8ad1-20f79486409c",
+      "parameters": {
+        "operation": "completion",
+        "respondWith": "text",
+        "completionTitle": "={{ $json.status === 'rejected' ? 'Run rejected' : 'Run approved' }}",
+        "completionMessage": "={{ $json.summary_text }} Output: http://127.0.0.1:8765/runs/{{ $json.id }}/target.csv",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Start run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start run": {
+      "main": [
+        [
+          {
+            "node": "Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review": {
+      "main": [
+        [
+          {
+            "node": "Send decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send decision": {
+      "main": [
+        [
+          {
+            "node": "Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
