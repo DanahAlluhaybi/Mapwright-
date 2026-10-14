@@ -175,8 +175,9 @@ For each run, `<out>/`:
   timestamp), every model call (prompt version, tokens, cache hit),
   invalid proposals, escalations, and run end (target hash)
 
-Still to come: reviewer decisions appended to the audit log by the
-review UI, and an optional SQL export of the plan.
+Reviewer decisions made through the local API (`POST /runs/<id>/review`,
+used by the n8n workflow) are appended as a `review` event: reviewer,
+decision, approved action ids, note, and the hash of the approved table.
 
 ## Stack
 
@@ -188,8 +189,8 @@ All local; nothing is deployed.
 | Engine | Plain Python over lists of rows | Files are hundreds of rows; typed actions keep the plan replayable without a SQL layer |
 | Schemas | Dataclasses for typed actions, YAML contracts and rule dictionaries | Few dependencies; everything testable anywhere |
 | LLM | Gemini (free tier) behind a small provider interface, plus a cached replay provider | Swappable model; replay makes evaluation reproducible without an API key |
-| CLI | argparse | `python -m mapwright run`, `python -m mapwright replay` |
-| Review UI | Small FastAPI app, server-rendered pages | Only for reviewing escalated actions; built last |
+| CLI | argparse | `python -m mapwright run`, `replay`, `serve` |
+| Review | Standard-library HTTP API plus an n8n workflow (`docs/N8N.md`) | The review flow lives in a tool built for workflows and approvals; Mapwright stays a plain library with no web framework |
 | Tests | pytest (tests are unittest-style, so `python -m unittest` works too) | |
 
 Deliberately not used: RAG, vector databases, multiple agents, LangChain,

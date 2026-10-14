@@ -11,32 +11,39 @@ Analyze → Propose → Transform → Validate → Revise if needed → Human ap
 ```
 
 Every claim about how well it works comes from a benchmark of 12 messy
-datasets with exact ground truth, comparing three systems on the same
-files: rules only, LLM only, and the hybrid.
+datasets with exact ground truth, comparing rules only, the model only,
+and the hybrid on the same files.
 
-Runs entirely on your own machine. No cloud services.
+Runs entirely on your own machine. No cloud services beyond the model API.
 
-## Status
+## In one paragraph
 
-Architecture, target contracts, benchmark and evaluation criteria were
-fixed before any pipeline code, and the hypotheses were written down
-before any results. The benchmark has 11 generated cases and one real
-export (H04), all with exact ground truth, held-out cases frozen. All four
-systems have been run and scored; see [Results](#results).
+On held-out files nobody looked at while building it (including a real
+Companies House export), the hybrid fixed **0.50** of the dirty cells
+against 0.37 for rules alone and 0.11 for the model alone, while leaving
+**6.6** wrong-but-unflagged values per 1,000 cells against 36.5 and 34.2.
+Most of what it did not fix was held for a person rather than got wrong:
+with every correct held change approved, it reaches 0.996. Means of three
+runs; details, ranges and the hypotheses tested are under
+[Results](#results).
 
-| Step | Status |
+## What is in the repo
+
+The contracts, benchmark, metrics and hypotheses were fixed before any
+pipeline code, and the held-out cases were frozen before any system ran
+on them.
+
+| Part | Where |
 | --- | --- |
-| Target contracts (`contracts/`) | Done |
-| Issue taxonomy (`benchmark/issue_types.yaml`) | Done |
-| Benchmark and evaluation design (`docs/`) | Done |
-| Benchmark generator, 11 cases, held-out set frozen | Done |
-| H04 from a real public export (Companies House) | Done |
-| Scorer, with its own tests and reference systems | Done |
-| Rules-only baseline (system R) | Done |
-| LLM layer: Gemini provider, cache, mapping, value actions, repair loop | Done |
-| Comparison: rules vs LLM vs hybrid, hypothesis verdicts | Done |
-| Local API and n8n review workflow (`docs/N8N.md`) | Done |
-| Migration package | |
+| Target contracts | `contracts/` |
+| Issue taxonomy (mapping, structural, semantic) | `benchmark/issue_types.yaml` |
+| Benchmark: 11 generated cases and one real export, exact ground truth | `benchmark/` |
+| Scorer and reference systems | `evaluation/` |
+| Pipeline: ingest, profile, mapping, typed actions, validation, approval policy, audit log | `src/mapwright/` |
+| Model layer: Gemini provider, response cache, mapping and value prompts, repair loop | `src/mapwright/llm/`, `src/mapwright/llmplan.py` |
+| Recorded model answers, so every run replays without a key | `llm_cache/` |
+| Local API and n8n review workflow | `src/mapwright/server.py`, `n8n/` |
+| Design documents | `docs/` |
 
 ## Getting started
 
@@ -60,10 +67,8 @@ python -m evaluation score runs/rules
 Onboarding a single file:
 
 ```
-python -m mapwright run benchmark/datasets/D06/source.csv --contract contracts/sales_order.yaml \
-    --reference customer_id=benchmark/reference_customers.csv --out runs/demo
-python -m mapwright replay runs/demo/plan.json benchmark/datasets/D06/source.csv \
-    --contract contracts/sales_order.yaml --out runs/demo/replayed.csv
+python -m mapwright run benchmark/datasets/D06/source.csv --contract contracts/sales_order.yaml --reference customer_id=benchmark/reference_customers.csv --out runs/demo
+python -m mapwright replay runs/demo/plan.json benchmark/datasets/D06/source.csv --contract contracts/sales_order.yaml --out runs/demo/replayed.csv
 ```
 
 Checking the Gemini key (the LLM systems need one; scoring a recorded run
@@ -79,9 +84,9 @@ not yet in `llm_cache/` and saves the answers; without it, runs replay the
 cache and need no key:
 
 ```
-python -m evaluation baseline llm runs/llm --split dev --record
-python -m evaluation baseline hybrid runs/hybrid --split dev --record
-python -m evaluation baseline hybrid-norepair runs/hybrid-norepair --split dev
+python -m evaluation baseline llm runs/llm --model gemini-3.1-flash-lite --record
+python -m evaluation baseline hybrid runs/hybrid --model gemini-3.1-flash-lite --record
+python -m evaluation baseline hybrid-norepair runs/hybrid-norepair --model gemini-3.1-flash-lite
 python -m evaluation score runs/hybrid
 ```
 
@@ -89,7 +94,7 @@ With a Gemini key set, the same command can use the model for what the
 rules leave (`--system hybrid`) or for everything (`--system llm`):
 
 ```
-python -m mapwright run examples/messy_customers.csv --contract contracts/customer.yaml --out runs/example-hybrid --system hybrid
+python -m mapwright run examples/messy_customers.csv --contract contracts/customer.yaml --out runs/example-hybrid --system hybrid --model gemini-3.1-flash-lite
 ```
 
 The run writes `target.csv`, `result.json`, `plan.json`, `report.md` and `audit.jsonl`.
@@ -109,47 +114,63 @@ in [docs/N8N.md](docs/N8N.md).
 Four systems on the same files, scored against exact ground truth:
 **R** rules only, **L** the model only, **H** rules first and the model for
 what they leave, **H−** the hybrid without the repair loop. Model:
-`gemini-3.1-flash-lite`, temperature 0, one run per case. The held-out
-cases (H01–H04, H04 a real Companies House export) were not looked at
-while building the rules or the prompts.
+`gemini-3.1-flash-lite`, temperature 0, **three runs per case**. The
+held-out cases (H01–H04, H04 a real Companies House export) were not
+looked at while building the rules or the prompts.
+
+Numbers are the mean of the three runs, with the lowest and highest run in
+brackets. R is deterministic, so it has one value.
 
 ### Held-out
 
 | Metric | R | L | H | H− |
 | --- | --- | --- | --- | --- |
-| Dirty-cell accuracy | 0.369 | 0.109 | **0.503** | 0.503 |
-| Clean-cell preservation | 0.433 | 0.978 | **0.989** | 0.989 |
-| Silent errors per 1,000 cells | 36.5 | 50.8 | **15.3** | 15.3 |
-| Mapping F1 | 0.66 | 0.91 | **0.99** | 0.99 |
-| Detection F1 | 0.50 | 0.65 | **0.90** | 0.90 |
+| Dirty-cell accuracy | 0.369 | 0.108 (0.103–0.111) | **0.496** (0.493–0.503) | 0.496 |
+| Clean-cell preservation | 0.433 | 0.978 | **0.996** (0.989–1.000) | 0.996 |
+| Silent errors per 1,000 cells | 36.5 | 34.2 (25.8–50.8) | **6.6** (2.2–15.3) | 6.6 |
+| Mapping F1 | 0.66 | 0.92 (0.91–0.92) | **0.99** (0.99–1.00) | 0.99 |
+| Detection F1 | 0.50 | 0.68 (0.65–0.70) | **0.90** (0.88–0.91) | 0.90 |
 | Missed reviews | 9 | 11 | **2** | 2 |
-| Contract pass rate | 0.57 | 0.67 | **0.82** | 0.82 |
-| Model calls per case | 0 | 2.0 | 2.5 | 2.0 |
+| Contract pass rate | 0.57 | 0.65 | **0.81** | 0.81 |
+| Model calls per case | 0 | 2.0 | 2.7 | 2.0 |
 
 On the development cases R and H both reach 0.998 dirty-cell accuracy
-with zero silent errors, and H makes no model calls: the rules already
-cover everything, so the model is only asked about what they leave. L
-alone reaches 0.227 there, with 10.0 silent errors per 1,000 cells.
+with zero silent errors in every run, and H makes no model calls: the
+rules already cover everything, so the model is only asked about what
+they leave. L alone reaches 0.244 there, with 9.8 silent errors per 1,000
+cells.
 
 A silent error is a wrong value that passes every contract check and is
 not flagged for review. It is the number that matters most in a migration,
 because nobody looks at those cells again.
 
+### Why three runs matter
+
+Accuracy barely moves between runs; silent errors do. In the first run H
+had 15.3 silent errors per 1,000 cells, in the other two 2.2. The whole
+difference is one decision on one file: in H02 the model mapped the
+`LIMIT_AMT` column to `credit_limit` with confidence 0.7 in the first run
+and higher in the others. Below the 0.8 threshold the mapping is held for
+approval, the column stays empty, and 158 credit limits are missing. The
+model was right each time; the confidence it reported was not stable. A
+single run would have reported either 2.2 or 15.3 as "the" result.
+
 ### Hypotheses
 
 Stated in [docs/EVALUATION.md](docs/EVALUATION.md) before any results.
+Verdicts use all three runs.
 
 | # | Hypothesis | Verdict |
 | --- | --- | --- |
-| 1 | R matches or beats L on structural issues | **Supported.** Structural detection F1: dev 1.00 vs 0.58, held-out 0.35 vs 0.33 |
-| 2 | L beats R on semantic issues and non-English headers, more so on held-out | **Partly.** Semantic F1 on held-out 0.79 vs 0.58, but no gap on dev (0.99 vs 1.00). Transliterated headers were mapped correctly but labelled as plain synonyms (M1), so M2 detection is 0 for both |
-| 3 | H is at least as accurate as R and L | **Supported.** Held-out dirty-cell accuracy 0.503 vs 0.369 and 0.109; equal to R on dev |
-| 4 | H has fewer silent errors than L | **Supported.** 15.3 vs 50.8 per 1,000 cells on held-out, 0 vs 10.0 on dev |
-| 5 | The repair loop reduces failures without adding silent errors | **Inconclusive.** H and H− score the same: almost no model action failed its checks, so the loop rarely ran |
+| 1 | R matches or beats L on structural issues | **Partly.** True on dev (structural detection F1 1.00 vs 0.50–0.58). Not on held-out: R 0.35, L 0.33–0.53, higher than R in two of three runs |
+| 2 | L beats R on semantic issues and non-English headers, more so on held-out | **Partly.** Semantic F1 on held-out 0.79–0.82 vs 0.58, no gap on dev (0.99 vs 1.00). Transliterated headers were mapped correctly but labelled as plain synonyms (M1), so M2 detection is 0 for both |
+| 3 | H is at least as accurate as R and L | **Supported** in every run. Held-out dirty-cell accuracy 0.49–0.50 vs 0.37 and 0.10–0.11; equal to R on dev |
+| 4 | H has fewer silent errors than L | **Supported** in every run. Held-out 2.2–15.3 vs 25.8–50.8 per 1,000 cells; 0 vs 9.6–10.0 on dev |
+| 5 | The repair loop reduces failures without adding silent errors | **Inconclusive.** H and H− score the same in all three runs: almost no model action failed its checks, so the loop rarely ran |
 
 ### What limits the hybrid
 
-Most of the gap between 0.503 and a perfect score is not the model getting
+Most of the gap between 0.50 and a perfect score is not the model getting
 things wrong. It is the approval policy holding correct fixes for a
 person. Any model action that changes more than 20% of a column waits for
 approval. With that one rule removed
@@ -157,38 +178,38 @@ approval. With that one rule removed
 
 | Held-out | H− | H− without the 20% rule |
 | --- | --- | --- |
-| Dirty-cell accuracy | 0.503 | 0.960 |
-| Silent errors per 1,000 cells | 15.3 | 15.3 |
-| Escalation precision | 0.54 | 0.86 |
+| Dirty-cell accuracy | 0.496 (0.493–0.503) | 0.950 (0.912–0.977) |
+| Silent errors per 1,000 cells | 6.6 (2.2–15.3) | 6.8 (2.2–15.3) |
+| Escalation precision | 0.56 | 0.81 |
 
-Accuracy nearly doubles and silent errors do not move, so the held fixes
+Accuracy nearly doubles and silent errors barely move, so the held fixes
 were almost all right. If a reviewer approves every correct held action,
-H reaches 0.996. The rule stays on by default: approving a batch of model
-changes is a person's decision, and the cost is review time, not wrong
-data. L does not gain the same way (0.109 to 0.596, with silent errors
-rising to 52.8), which is why the rules go first.
+H reaches 0.996 in every run. The rule stays on by default: approving a
+batch of model changes is a person's decision, and the cost is review
+time, not wrong data. Without the rule L reaches only 0.662 (0.596–0.714),
+which is why the rules go first.
 
 ### Reproducing
 
-Every model answer is in `llm_cache/`, so the runs replay without an API
+Every model answer is in `llm_cache/`, so all runs replay without an API
 key:
 
 ```
-python -m evaluation baseline hybrid runs/hybrid --model gemini-3.1-flash-lite
-python -m evaluation score runs/hybrid
-python -m evaluation baseline hybrid-norepair runs/h-noshare --model gemini-3.1-flash-lite --policy evaluation/policies/no-share-limit.yaml
+python -m evaluation baseline hybrid runs/hybrid-s1 --model gemini-3.1-flash-lite --sample 1
+python -m evaluation score runs/hybrid-s1
+python -m evaluation baseline hybrid-norepair runs/h-noshare-s1 --model gemini-3.1-flash-lite --sample 1 --policy evaluation/policies/no-share-limit.yaml
 ```
 
-The same for `rules`, `llm` and `hybrid-norepair`. The held-out rules
-numbers come from version 1.1 of system R, which fixed one ingest bug
-found while building H04 (header text was trimmed, so `" CompanyNumber"`
-no longer matched its own column); the fix changed no score on H01–H03.
+The same for `rules`, `llm` and `hybrid-norepair`, and for `--sample 0`
+and `--sample 2`. The held-out rules numbers come from version 1.1 of
+system R, which fixed one ingest bug found while building H04 (header
+text was trimmed, so `" CompanyNumber"` no longer matched its own
+column); the fix changed no score on H01–H03.
 
 ### Limits
 
-One model, one run per case, 12 cases. The numbers show direction, not
-precise effect sizes. Repeated runs and a second model are the next
-things to add.
+One model, three runs per case, 12 cases. The numbers show direction, not
+precise effect sizes. A second model is the next thing to add.
 
 ## Documents
 
