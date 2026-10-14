@@ -6,106 +6,209 @@
 <title>Mapwright Agent</title>
 <style>
   :root {
-    --bg: #f7f7f5; --card: #ffffff; --text: #1d1d1b; --muted: #6b6b66; --line: #e3e3de; --soft: #f0f0ec;
-    --accent: #2f5bea; --accent-text: #ffffff; --warn: #a15c00; --warn-bg: #fff4e0;
-    --ok: #1d7a3e; --ok-bg: #e7f6ec; --bad: #b42318; --bad-bg: #fdecea;
+    --bg: #f6f7f9; --card: #ffffff; --text: #16181d; --muted: #667085; --line: #e4e7ec; --soft: #f2f4f7;
+    --accent: #3156e0; --accent-soft: #eef2ff; --accent-text: #ffffff; --gray: #98a2b3;
+    --warn: #b54708; --warn-bg: #fef0c7; --ok: #067647; --ok-bg: #dcfae6; --bad: #c01048; --bad-bg: #fee4e2;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #161615; --card: #1f1f1d; --text: #ececea; --muted: #a3a39d; --line: #33332f; --soft: #262624;
-      --accent: #7c9bff; --accent-text: #0e0e0d; --warn: #ffb547; --warn-bg: #332611;
-      --ok: #6fd193; --ok-bg: #12291a; --bad: #ff8a80; --bad-bg: #3a1714;
+      --bg: #111317; --card: #1a1d23; --text: #eceef2; --muted: #98a2b3; --line: #2c313a; --soft: #22262d;
+      --accent: #7f9cff; --accent-soft: #1f2640; --accent-text: #0d0f14; --gray: #5d6675;
+      --warn: #fdb022; --warn-bg: #3b2a0c; --ok: #47cd89; --ok-bg: #0f2e1f; --bad: #fd6f8e; --bad-bg: #3d1320;
     }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;
-           max-width: 1240px; margin: 0 auto; padding: 24px 16px 8px; }
-  header h1 { font-size: 22px; margin: 0; }
-  main { max-width: 1240px; margin: 0 auto; padding: 0 16px 64px; }
-  a { color: var(--accent); }
-  .muted, .hint { color: var(--muted); } .hint { font-size: 13px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
-  h2 { font-size: 16px; margin: 0 0 10px; } h3 { font-size: 15px; margin: 0 0 6px; }
-  label { display: block; font-weight: 600; margin: 8px 0 4px; font-size: 14px; }
-  input[type=text], select, textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px;
-       background: var(--bg); color: var(--text); font: inherit; }
-  textarea { min-height: 64px; resize: vertical; }
-  button { font: inherit; font-weight: 600; padding: 7px 14px; border-radius: 6px; border: 1px solid var(--line);
+  a { color: var(--accent); text-decoration: none; } a:hover { text-decoration: underline; }
+  header { display: flex; justify-content: space-between; align-items: center; gap: 12px; max-width: 1240px; margin: 0 auto; padding: 18px 16px 6px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 19px; }
+  .brand svg { color: var(--accent); }
+  main { max-width: 1240px; margin: 0 auto; padding: 8px 16px 64px; }
+  .muted { color: var(--muted); } .small { font-size: 13px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  h2 { font-size: 16px; margin: 0 0 10px; } h3 { font-size: 14px; margin: 14px 0 6px; }
+  .hidden { display: none !important; }
+
+  /* buttons and inputs */
+  button { font: inherit; font-weight: 600; padding: 8px 14px; border-radius: 9px; border: 1px solid var(--line);
            background: var(--card); color: var(--text); cursor: pointer; }
+  button:hover { background: var(--soft); }
   button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
-  button.small { padding: 3px 10px; font-size: 13px; font-weight: 500; }
+  button.primary:hover { filter: brightness(1.05); }
+  button.small { padding: 4px 11px; font-size: 13px; font-weight: 500; border-radius: 99px; }
   button:disabled { opacity: .5; cursor: wait; }
-  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
-  .row > * { flex: 1 1 180px; }
-  .layout { display: grid; grid-template-columns: minmax(300px, 420px) 1fr; gap: 12px; align-items: start; }
-  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
-  .tiles { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
-  .tile { background: var(--soft); border-radius: 8px; padding: 6px 10px; font-size: 13px; }
-  .tile b { font-size: 16px; margin-right: 4px; }
-  .links { display: flex; gap: 12px; flex-wrap: wrap; font-size: 14px; margin-top: 6px; }
+  input[type=text], select, textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px;
+       background: var(--bg); color: var(--text); font: inherit; }
+  label { display: block; font-weight: 600; margin: 8px 0 4px; font-size: 13px; color: var(--muted); }
+
+  /* upload */
+  .start { max-width: 640px; margin: 40px auto 0; text-align: center; }
+  .start h1 { font-size: 26px; margin: 0 0 6px; }
+  .drop { display: block; margin: 22px 0 12px; padding: 44px 20px; border: 2px dashed var(--line); border-radius: 16px; background: var(--card);
+          cursor: pointer; transition: border-color .15s, background .15s; }
+  .drop:hover, .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+  .drop svg { color: var(--accent); } .drop { color: var(--text); font-weight: 400; }
+  .drop b { display: block; font-size: 17px; margin-top: 8px; }
+  .promises { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .promises span::before { content: "✓ "; color: var(--ok); font-weight: 700; }
+  details.options { text-align: left; margin-top: 18px; }
+  details.options summary { cursor: pointer; color: var(--muted); font-size: 14px; text-align: center; list-style: none; }
+  details.options summary::-webkit-details-marker { display: none; }
+  .optgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0 12px; margin-top: 8px; }
+  .status { padding: 9px 12px; border-radius: 9px; margin-top: 10px; font-size: 14px; }
+  .status.ok { background: var(--ok-bg); color: var(--ok); } .status.bad { background: var(--bad-bg); color: var(--bad); }
+  .status.warn { background: var(--warn-bg); color: var(--warn); }
+
+  /* summary bar */
+  .summary { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; }
+  @media (max-width: 700px) { .summary { grid-template-columns: 1fr; } }
+  .ring { position: relative; width: 104px; height: 104px; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring .value { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font-size: 22px; font-weight: 700; line-height: 1.1; }
+  .ring .value small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); }
+  .title-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .title-row h2 { margin: 0; font-size: 18px; }
+  .stats { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+  .stat { background: var(--soft); border-radius: 10px; padding: 6px 12px; font-size: 13px; color: var(--muted); }
+  .stat b { font-size: 17px; color: var(--text); margin-right: 4px; }
+  .stat.error b { color: var(--bad); } .stat.anomaly b { color: var(--warn); }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .menu { position: relative; }
+  .menu summary { list-style: none; } .menu summary::-webkit-details-marker { display: none; }
+  .menu summary { font-weight: 600; padding: 4px 11px; font-size: 13px; border: 1px solid var(--line); border-radius: 99px; cursor: pointer; background: var(--card); }
+  .menu[open] .items { position: absolute; z-index: 5; top: 32px; left: 0; background: var(--card); border: 1px solid var(--line);
+                       border-radius: 10px; padding: 6px; min-width: 170px; box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+  .menu .items a { display: block; padding: 6px 10px; border-radius: 6px; color: var(--text); font-size: 14px; }
+  .menu .items a:hover { background: var(--soft); text-decoration: none; }
+  .guess { font-size: 14px; margin-top: 4px; }
+
+  /* layout */
+  .layout { display: grid; grid-template-columns: minmax(300px, 400px) 1fr; gap: 14px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+  /* columns */
+  .cols { display: flex; flex-direction: column; gap: 2px; max-height: 60vh; overflow-y: auto; margin: 0 -8px; }
+  .colrow { display: grid; grid-template-columns: 20px 1fr auto; gap: 4px 8px; align-items: center; padding: 8px; border-radius: 9px; cursor: pointer; }
+  .colrow:hover { background: var(--soft); } .colrow.active { background: var(--accent-soft); }
+  .colrow .name { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .colrow .meta { grid-column: 2 / 4; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+  .colrow input { margin: 0; }
+  .bar { display: flex; height: 7px; border-radius: 99px; overflow: hidden; background: var(--soft); flex: 1; min-width: 60px; }
+  .bar span { display: block; height: 100%; }
+  .seg-ok { background: var(--ok); } .seg-warn { background: var(--warn); } .seg-missing { background: var(--gray); }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 4px; }
+  .pill { display: inline-block; font-size: 12px; padding: 0 9px; border-radius: 99px; background: var(--soft); color: var(--muted); white-space: nowrap; }
+  .pill.error, .pill.destructive, .pill.low { color: var(--bad); background: var(--bad-bg); }
+  .pill.anomaly, .pill.review, .pill.estimate, .pill.guess, .pill.medium { color: var(--warn); background: var(--warn-bg); }
+  .pill.ok, .pill.safe, .pill.high { color: var(--ok); background: var(--ok-bg); }
+  .pill.count { color: var(--warn); background: var(--warn-bg); }
+  dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 6px 0; font-size: 14px; }
+  dt { color: var(--muted); } dd { margin: 0; }
+  .detail ul { margin: 4px 0; padding-left: 18px; font-size: 14px; }
+
+  /* assistant */
+  .chat { display: flex; flex-direction: column; min-height: 60vh; }
+  .thread { display: flex; flex-direction: column; gap: 12px; flex: 1; max-height: 64vh; overflow-y: auto; padding: 2px 4px 8px 0; }
+  .msg { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); font-size: 14px; }
+  .msg.bot { background: var(--soft); border: 0; }
+  .msg.user { align-self: flex-end; background: var(--accent); color: var(--accent-text); border: 0; max-width: 80%; }
+  .msg ul { margin: 6px 0; padding-left: 20px; }
+  .empty { text-align: center; padding: 30px 10px; color: var(--muted); }
+  .empty b { display: block; color: var(--text); font-size: 16px; margin-bottom: 4px; }
+  .suggest { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .empty .suggest { justify-content: center; }
+  .composer { display: flex; gap: 8px; align-items: flex-end; margin-top: 10px; }
+  .composer textarea { min-height: 46px; max-height: 160px; resize: vertical; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .chip { background: var(--accent-soft); color: var(--accent); border-radius: 99px; padding: 2px 4px 2px 10px; font-size: 13px; }
+  .chip button { border: 0; background: none; padding: 0 6px; color: inherit; font-weight: 700; }
+
+  /* proposal */
+  .proposal { border-left: 4px solid var(--accent); }
+  .proposal .head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-weight: 600; font-size: 15px; }
+  .conf { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; margin: 10px 0 4px; }
+  .conf .bar { height: 9px; }
+  .conf-high { background: var(--ok); } .conf-medium { background: var(--warn); } .conf-low { background: var(--bad); }
+  .conf b { font-size: 15px; }
+  .why summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+  .factor { display: grid; grid-template-columns: 110px 70px 1fr; gap: 8px; align-items: center; font-size: 13px; margin: 6px 0; }
+  .factor .bar { height: 6px; }
+  .effect { margin: 8px 0; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { color: var(--muted); font-weight: 600; }
   .wide { overflow-x: auto; }
-  tr.col { cursor: pointer; } tr.col:hover td { background: var(--soft); } tr.col.active td { background: var(--soft); font-weight: 600; }
-  .tag { display: inline-block; font-size: 12px; padding: 0 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
-  .tag.error, .tag.destructive { color: var(--bad); background: var(--bad-bg); border-color: transparent; }
-  .tag.anomaly, .tag.review, .tag.estimate, .tag.guess { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
-  .tag.ok, .tag.low { color: var(--ok); background: var(--ok-bg); border-color: transparent; }
-  .thread { display: flex; flex-direction: column; gap: 10px; max-height: 70vh; overflow-y: auto; padding-right: 4px; }
-  .msg { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); }
-  .msg.user { align-self: flex-end; background: var(--soft); max-width: 85%; border: 0; }
-  .msg ul { margin: 6px 0; padding-left: 20px; }
-  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; min-height: 4px; }
-  .chip { background: var(--soft); border-radius: 99px; padding: 1px 10px; font-size: 13px; }
-  .chip button { border: 0; background: none; padding: 0 0 0 4px; cursor: pointer; color: var(--muted); }
-  .suggest { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-  .status { padding: 8px 10px; border-radius: 6px; margin-top: 8px; font-size: 14px; }
-  .status.ok { background: var(--ok-bg); color: var(--ok); } .status.bad { background: var(--bad-bg); color: var(--bad); }
-  .status.warn { background: var(--warn-bg); color: var(--warn); }
-  .hidden { display: none !important; }
+  .before, .after { white-space: nowrap; }
+  .before { color: var(--bad); text-decoration: line-through; } .after { color: var(--ok); font-weight: 600; }
+  .decide { display: flex; gap: 8px; margin-top: 10px; }
+
+  /* findings */
+  .finding { border-left: 4px solid var(--line); background: var(--card); border-radius: 10px; padding: 9px 12px; margin: 8px 0; border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .finding.error { border-left-color: var(--bad); } .finding.anomaly { border-left-color: var(--warn); } .finding.recommendation { border-left-color: var(--gray); }
+  .finding .t { font-weight: 600; } .finding .d { color: var(--muted); font-size: 13px; }
+
+  /* charts drawn on the server */
   .chart { width: 100%; height: auto; display: block; margin: 8px 0; }
   .chart-label { font-size: 12px; fill: var(--muted); } .chart-value { font-size: 11px; fill: var(--muted); }
   .chart-bar { fill: var(--accent); } .chart-grid, .chart-axis { stroke: var(--line); stroke-width: 1; }
   .chart-line { fill: none; stroke: var(--accent); stroke-width: 2; } .chart-line.estimate { stroke: var(--warn); stroke-dasharray: 6 4; }
-  .chart-line-dot { fill: var(--accent); } .chart-estimate-zone { fill: var(--warn-bg); opacity: .6; }
-  .before { color: var(--bad); text-decoration: line-through; } .after { color: var(--ok); }
-  dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 6px 0; font-size: 14px; }
-  dt { color: var(--muted); }
+  .chart-dot { fill: var(--accent); } .dot-estimate, .dot-warn { fill: var(--warn); } .dot-bad { fill: var(--bad); }
+  .chart-line.tone-bad { stroke: var(--bad); } .chart-line.tone-warn { stroke: var(--warn); } .chart-estimate-zone { fill: var(--warn-bg); opacity: .6; }
 </style>
 </head>
 <body>
 <header>
-  <h1>Mapwright Agent</h1>
-  <span class="muted">Understand a file, clean it with your approval, analyse it. <a href="/">Schema mode</a></span>
+  <div class="brand">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg>
+    Mapwright
+  </div>
+  <a class="small" href="/">Schema mode</a>
 </header>
 <main>
-  <section class="card" id="upload">
-    <div class="row">
-      <div><label for="file">CSV or Excel file</label><input type="file" id="file" accept=".csv,text/csv,.xlsx,.xlsm"></div>
-      <div id="sheetBox" class="hidden"><label for="sheet">Sheet</label><input type="text" id="sheet" placeholder="first sheet if empty"></div>
-      <div><label for="model">Understanding requests</label><select id="model"><option value="rules">Built-in rules (no AI, free)</option></select></div>
-      <div><label for="reviewer">Your name (for the history)</label><input type="text" id="reviewer" autocomplete="name"></div>
-      <div style="flex:0 0 auto"><button class="primary" id="open">Open the file</button></div>
-    </div>
-    <p class="hint" id="modelHint"></p>
+  <!-- step 1: choose a file -->
+  <section id="upload" class="start">
+    <h1>What's in your data?</h1>
+    <p class="muted">Drop a file. I'll check it, suggest fixes and answer questions about it.</p>
+    <label class="drop" id="drop" for="file">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+      <b id="dropText">Drop a CSV or Excel file here</b>
+      <span class="muted small">or click to choose</span>
+      <input type="file" id="file" accept=".csv,text/csv,.xlsx,.xlsm" hidden>
+    </label>
+    <div class="promises"><span>Stays on this computer</span><span>Original file never changed</span><span>Nothing changes without your OK</span></div>
     <div id="uploadStatus"></div>
+    <details class="options">
+      <summary>Options ▾</summary>
+      <div class="optgrid">
+        <div><label for="sheet">Excel sheet</label><input type="text" id="sheet" placeholder="first sheet"></div>
+        <div><label for="model">Understanding requests</label><select id="model"><option value="rules">Built-in rules (free, no AI)</option></select></div>
+        <div><label for="reviewer">Your name (for the history)</label><input type="text" id="reviewer" autocomplete="name"></div>
+      </div>
+      <p class="muted small" id="modelHint"></p>
+    </details>
   </section>
 
+  <!-- step 2: work on it -->
   <section id="workspace" class="hidden">
-    <div class="card">
-      <h2 id="fileTitle"></h2>
-      <div class="tiles" id="tiles"></div>
-      <p id="guess"></p>
-      <div class="links">
-        <a id="reportLink" target="_blank">Report</a>
-        <a id="dashLink" target="_blank">Dashboard</a>
-        <a id="csvLink">Download CSV</a>
-        <a id="xlsxLink">Download Excel</a>
-        <a id="planLink">Download the steps</a>
-        <a href="#" id="undo">Undo the last step</a>
-        <a href="#" id="showHistory">History</a>
+    <div class="card summary">
+      <div class="ring" id="ring"></div>
+      <div>
+        <div class="title-row">
+          <h2 id="fileTitle"></h2>
+          <button class="small" id="another">Open another file</button>
+        </div>
+        <div class="stats" id="stats"></div>
+        <div class="actions">
+          <button class="small primary" id="dashBtn">Dashboard</button>
+          <button class="small" id="reportBtn">Report</button>
+          <details class="menu"><summary>Download ▾</summary>
+            <div class="items"><a id="csvLink">Clean CSV</a><a id="xlsxLink">Clean Excel</a><a id="planLink">Steps (to repeat)</a></div>
+          </details>
+          <button class="small" id="undo">Undo last change</button>
+          <button class="small" id="showHistory">History</button>
+        </div>
+        <div class="guess" id="guess"></div>
       </div>
     </div>
 
@@ -113,23 +216,20 @@
       <div>
         <div class="card">
           <h2>Columns</h2>
-          <p class="hint">Click a column to see what it holds. Tick columns to talk about them.</p>
-          <div class="wide"><table>
-            <thead><tr><th></th><th>Column</th><th>Type</th><th>Missing</th><th>Issues</th></tr></thead>
-            <tbody id="columns"></tbody>
-          </table></div>
+          <p class="muted small" style="margin:-4px 0 8px">Click a column to see it. Tick columns to talk about them.</p>
+          <div class="cols" id="columns"></div>
+          <div class="legend"><span><i class="seg-ok"></i>fits</span><span><i class="seg-warn"></i>doesn't fit</span><span><i class="seg-missing"></i>missing</span></div>
         </div>
-        <div class="card hidden" id="columnCard"></div>
+        <div class="card detail hidden" id="columnCard"></div>
       </div>
 
-      <div class="card">
+      <div class="card chat">
         <h2>Assistant</h2>
         <div class="thread" id="thread"></div>
         <div class="chips" id="chips"></div>
-        <textarea id="ask" placeholder="For example: convert this column to yes/no · standardise these names · fill missing values · top 5 cities by sales · trend per month · find suspicious records · create a dashboard"></textarea>
-        <div class="row" style="margin-top:8px">
-          <div style="flex:0 0 auto"><button class="primary" id="send">Send</button></div>
-          <div class="suggest" id="suggest"></div>
+        <div class="composer">
+          <textarea id="ask" rows="1" placeholder="Ask anything… e.g. any duplicates? · fix the dates · top 5 cities by sales"></textarea>
+          <button class="primary" id="send">Send</button>
         </div>
       </div>
     </div>
@@ -146,7 +246,7 @@
       else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
       else node.setAttribute(k, v);
     }
-    for (const c of children) if (c != null) node.append(c);
+    for (const c of children) if (c != null && c !== "") node.append(c);
     return node;
   };
   let token = "", session = null, overview = null, selected = new Set(), activeColumn = null;
@@ -168,78 +268,99 @@
   const withToken = (url) => token ? url + (url.includes("?") ? "&" : "?") + "token=" + encodeURIComponent(token) : url;
   const reviewer = () => $("reviewer").value.trim() || "me";
   const status = (box, kind, text) => { box.replaceChildren(text ? el("div", { class: "status " + kind, text }) : ""); };
+  const pct = (x) => Math.round(x * 100) + "%";
+  const plural = (n, word) => n.toLocaleString() + " " + word + (n === 1 ? "" : "s");
+  const tone = (x) => x >= 0.9 ? "ok" : x >= 0.7 ? "warn" : "bad";
 
-  // ---------- setup ----------
+  // ---------- step 1: file ----------
   try { $("reviewer").value = localStorage.getItem("mapwright.reviewer") || ""; } catch (e) {}
   $("reviewer").addEventListener("change", () => { try { localStorage.setItem("mapwright.reviewer", $("reviewer").value); } catch (e) {} });
-  $("file").addEventListener("change", () => {
-    const f = $("file").files[0];
-    $("sheetBox").classList.toggle("hidden", !(f && /\.xls[xm]$/i.test(f.name)));
-  });
   (async () => {
     try {
       const m = await api("/models");
       for (const name of m.local) $("model").append(el("option", { value: name, text: name.replace("ollama/", "") + " (AI on this computer, free)" }));
       for (const name of m.gemini) $("model").append(el("option", { value: name, text: name + " (Google AI, needs GEMINI_API_KEY)" }));
-      $("modelHint").textContent = "Only column names, counts and a few example values are sent to an AI model, never the whole file."
+      $("modelHint").textContent = "Only column names, counts and a few example values go to an AI model, never the whole file."
         + (m.local.length ? "" : " For a free AI on this computer, install Ollama and run: ollama pull " + m.local_suggestion.replace("ollama/", ""));
     } catch (e) { /* rules still work */ }
   })();
 
-  $("open").addEventListener("click", async () => {
-    const f = $("file").files[0];
-    if (!f) return status($("uploadStatus"), "warn", "Choose a file first.");
-    $("open").disabled = true;
-    status($("uploadStatus"), "warn", "Reading and profiling the file...");
+  const drop = $("drop");
+  ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", (e) => { const f = e.dataTransfer.files[0]; if (f) openFile(f); });
+  $("file").addEventListener("change", () => { const f = $("file").files[0]; if (f) openFile(f); });
+  $("another").addEventListener("click", () => {
+    $("workspace").classList.add("hidden"); $("upload").classList.remove("hidden");
+    $("file").value = ""; $("dropText").textContent = "Drop a CSV or Excel file here"; status($("uploadStatus"), "", "");
+  });
+
+  async function openFile(f) {
+    if (!/\.(csv|xlsx|xlsm)$/i.test(f.name)) return status($("uploadStatus"), "bad", "Please choose a .csv or .xlsx file.");
+    $("dropText").textContent = f.name;
+    status($("uploadStatus"), "warn", "Reading and checking " + f.name + "…");
     try {
       const q = new URLSearchParams({ filename: f.name });
       if ($("sheet").value.trim()) q.set("sheet", $("sheet").value.trim());
       const data = await api("/sessions?" + q, { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: f });
       session = data.id; selected.clear(); activeColumn = null;
-      $("thread").replaceChildren();
-      status($("uploadStatus"), "ok", "Opened. The original file is kept unchanged; every change below needs your approval.");
+      $("thread").replaceChildren(); $("columnCard").classList.add("hidden");
+      status($("uploadStatus"), "", "");
       render(data);
-      $("workspace").classList.remove("hidden");
+      $("upload").classList.add("hidden"); $("workspace").classList.remove("hidden");
       introduce(data);
     } catch (e) { status($("uploadStatus"), "bad", e.message); }
-    finally { $("open").disabled = false; }
-  });
+  }
 
-  // ---------- overview ----------
+  // ---------- summary ----------
   async function refresh() { render(await api(sp(""))); if (activeColumn) showColumn(activeColumn); }
+
+  function ring(score) {
+    const r = 44, len = 2 * Math.PI * r;
+    const holder = $("ring");
+    holder.innerHTML = `<svg width="104" height="104" viewBox="0 0 104 104"><circle cx="52" cy="52" r="${r}" fill="none" stroke="var(--line)" stroke-width="10"/>`
+      + `<circle cx="52" cy="52" r="${r}" fill="none" stroke="var(--${tone(score)})" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(score * len).toFixed(1)} ${len.toFixed(1)}"/></svg>`;
+    holder.append(el("div", { class: "value" }, el("div", {}, pct(score), el("small", { text: "quality" }))));
+    holder.title = "Share of cells without errors or anomalies";
+  }
+
+  function health(c) {
+    const rows = Math.max(c.rows, 1), filled = c.filled / rows;
+    const fit = c.type === "empty" ? 0 : filled * c.confidence;
+    return { fit, misfit: Math.max(filled - fit, 0), missing: (c.blank + c.null_tokens) / rows };
+  }
+  const healthBar = (h) => el("span", { class: "bar", title: `${pct(h.fit)} fit the type · ${pct(h.misfit)} don't · ${pct(h.missing)} missing` },
+    el("span", { class: "seg-ok", style: `width:${h.fit * 100}%` }), el("span", { class: "seg-warn", style: `width:${h.misfit * 100}%` }),
+    el("span", { class: "seg-missing", style: `width:${h.missing * 100}%` }));
 
   function render(data) {
     overview = data;
-    const s = data.summary;
+    const s = data.summary, n = data.finding_counts;
+    ring(data.quality_score);
     $("fileTitle").textContent = data.meta.filename + (data.meta.read && data.meta.read.sheet ? " · " + data.meta.read.sheet : "");
-    $("tiles").replaceChildren(
-      el("span", { class: "tile" }, el("b", { text: s.rows.toLocaleString() }), "rows"),
-      el("span", { class: "tile" }, el("b", { text: String(s.columns) }), "columns"),
-      el("span", { class: "tile" }, el("b", { text: Math.round(data.quality_score * 100) + "%" }), "cells without errors or anomalies"),
-      el("span", { class: "tile" }, el("b", { text: String(data.finding_counts.error) }), "errors"),
-      el("span", { class: "tile" }, el("b", { text: String(data.finding_counts.anomaly) }), "anomalies"),
-      el("span", { class: "tile" }, el("b", { text: String(data.steps) }), "approved steps"));
-    $("guess").replaceChildren(s.guess ? el("span", {}, el("span", { class: "tag guess", text: "guess" }), " This looks like " + s.guess + ". Is that right? Tell me what the file is for if not.") : "");
-    $("reportLink").href = withToken(sp("/report"));
-    $("dashLink").href = withToken(sp("/dashboard"));
+    const stat = (value, label, cls) => el("span", { class: "stat " + (cls || "") }, el("b", { text: value }), label);
+    $("stats").replaceChildren(stat(s.rows.toLocaleString(), "rows"), stat(String(s.columns), "columns"),
+      stat(String(n.error), n.error === 1 ? "error" : "errors", n.error ? "error" : ""), stat(String(n.anomaly), n.anomaly === 1 ? "anomaly" : "anomalies", n.anomaly ? "anomaly" : ""), stat(String(n.recommendation), "tips"),
+      stat(String(data.steps), data.steps === 1 ? "change" : "changes"));
+    $("guess").replaceChildren(s.guess ? el("span", {}, el("span", { class: "pill guess", text: "guess" }), " Looks like " + s.guess + ". If not, tell me what the file is for.") : "");
     $("csvLink").href = withToken(sp("/export/csv"));
     $("xlsxLink").href = withToken(sp("/export/xlsx"));
     $("planLink").href = withToken(sp("/export/plan"));
-    const body = $("columns");
-    body.replaceChildren();
+    $("undo").disabled = !data.steps;
+    const list = $("columns");
+    list.replaceChildren();
     for (const c of data.columns) {
-      const box = el("input", { type: "checkbox" });
+      const box = el("input", { type: "checkbox", title: "talk about this column" });
       box.checked = selected.has(c.name);
       box.addEventListener("click", (ev) => { ev.stopPropagation(); box.checked ? selected.add(c.name) : selected.delete(c.name); renderChips(); });
-      const tr = el("tr", { class: "col" + (c.name === activeColumn ? " active" : "") },
-        el("td", {}, box), el("td", { text: c.name }), el("td", {}, el("span", { class: "tag", text: c.label })),
-        el("td", { text: String(c.blank + c.null_tokens) }),
-        el("td", {}, c.findings ? el("span", { class: "tag review", text: String(c.findings) }) : ""));
-      tr.addEventListener("click", () => showColumn(c.name));
-      body.append(tr);
+      const row = el("div", { class: "colrow" + (c.name === activeColumn ? " active" : ""), "data-name": c.name },
+        box, el("span", { class: "name", title: c.name, text: c.name }),
+        c.findings ? el("span", { class: "pill count", title: "issues", text: String(c.findings) }) : el("span"),
+        el("span", { class: "meta" }, el("span", { class: "pill", text: c.label }), healthBar(health(c))));
+      row.addEventListener("click", () => showColumn(c.name));
+      list.append(row);
     }
     renderChips();
-    renderSuggestions();
   }
 
   function renderChips() {
@@ -247,82 +368,84 @@
       el("button", { title: "remove", text: "×", onclick: () => { selected.delete(n); render(overview); } }))));
   }
 
-  function renderSuggestions() {
-    const picks = [["What should I fix first?", "show the data quality issues"], ["Which columns matter?", "which columns are useful for analysis"],
-                   ["Find suspicious records", "find suspicious records"], ["Overview", "give me an overview of the file"]];
+  function suggestions() {
+    const picks = [["What should I fix first?", "show the data quality issues"], ["Any duplicates?", "are there any duplicates?"],
+                   ["Suspicious records", "find suspicious records"], ["Which columns matter?", "which columns are useful for analysis"]];
     const dates = overview.columns.filter((c) => c.type === "date"), money = overview.columns.filter((c) => c.role === "measure");
     if (dates.length && money.length) picks.push(["Trend per month", "trend of " + money[0].name + " per month"]);
-    $("suggest").replaceChildren(...picks.map(([label, text]) => el("button", { class: "small", text: label, onclick: () => send(text, []) })));
+    return el("div", { class: "suggest" }, ...picks.map(([label, text]) => el("button", { class: "small", text: label, onclick: () => send(text, []) })));
   }
 
   function introduce(data) {
-    const s = data.summary, issues = data.finding_counts;
-    const msg = el("div", { class: "msg" });
-    msg.append(el("div", { text: `I read ${s.rows.toLocaleString()} rows and ${s.columns} columns. ` +
-      `I found ${issues.error} errors, ${issues.anomaly} things that look unusual and ${issues.recommendation} formatting suggestions. ` +
-      `Click a column to see what it holds, or ask me something.` }));
-    $("thread").append(msg);
+    const s = data.summary, n = data.finding_counts;
+    const total = n.error + n.anomaly;
+    $("thread").append(el("div", { class: "empty", id: "welcome" },
+      el("b", { text: total ? `I found ${n.error} errors and ${n.anomaly} things that look off.` : "This file looks clean." }),
+      el("div", { text: `${s.rows.toLocaleString()} rows · ${s.columns} columns. Pick a question or type your own.` }),
+      suggestions()));
   }
 
   // ---------- column panel ----------
   async function showColumn(name) {
     activeColumn = name;
-    for (const tr of $("columns").children) tr.classList.toggle("active", tr.children[1].textContent === name);
+    for (const row of $("columns").children) row.classList.toggle("active", row.dataset.name === name);
     const c = await api(sp("/columns/" + encodeURIComponent(name)));
     const card = $("columnCard");
     const typeSelect = el("select", {}, el("option", { value: "auto", text: "as found (" + c.label + ")" }),
       ...c.types.map((t) => el("option", { value: t, text: t })));
-    const overridden = overview.meta.types && overview.meta.types[name];
-    typeSelect.value = overridden || "auto";
+    typeSelect.value = (overview.meta.types && overview.meta.types[name]) || "auto";
     typeSelect.addEventListener("change", async () => {
       await post(sp("/columns/" + encodeURIComponent(name) + "/type"), { type: typeSelect.value, reviewer: reviewer() });
       await refresh();
     });
+    const h = health(c);
     const stats = Object.entries(c.stats || {}).map(([k, v]) => [k, typeof v === "number" ? v.toLocaleString() : String(v)]);
     card.replaceChildren(
-      el("h2", { text: c.name }),
+      el("div", { class: "title-row" }, el("h2", { text: c.name, style: "margin:0" }),
+        el("button", { class: "small", text: "×", title: "close", onclick: () => { card.classList.add("hidden"); activeColumn = null; render(overview); } })),
+      el("div", { style: "display:flex;gap:8px;align-items:center;margin:10px 0" }, healthBar(h), el("span", { class: "small muted", text: pct(h.fit) + " fit" })),
       el("dl", {},
         el("dt", { text: "Type" }), el("dd", {}, typeSelect),
-        el("dt", { text: "Role" }), el("dd", { text: c.role }),
-        el("dt", { text: "Meaning" }), el("dd", {}, c.meaning ? el("span", {}, el("span", { class: "tag guess", text: "guess" }), " " + c.meaning) : el("span", { class: "muted", text: "no guess from the name" })),
-        el("dt", { text: "Filled" }), el("dd", { text: `${c.filled} of ${c.rows} (${c.blank + c.null_tokens} missing), ${c.distinct} distinct` }),
+        el("dt", { text: "Sure of type" }), el("dd", { text: pct(c.confidence) + " of the filled values fit" }),
+        el("dt", { text: "Meaning" }), el("dd", {}, c.meaning ? el("span", {}, el("span", { class: "pill guess", text: "guess" }), " " + c.meaning) : el("span", { class: "muted", text: "no guess from the name" })),
+        el("dt", { text: "Filled" }), el("dd", { text: `${c.filled.toLocaleString()} of ${c.rows.toLocaleString()} · ${c.distinct.toLocaleString()} distinct` }),
         ...stats.flatMap(([k, v]) => [el("dt", { text: k }), el("dd", { text: v })])),
-      el("h3", { text: "Why I think so" }), el("ul", {}, ...c.evidence.map((e) => el("li", { text: e }))),
-      el("h3", { text: "Examples" }), el("p", { text: c.examples.join(" · ") || "none" }),
-      c.misfits.length ? el("p", {}, el("b", { text: "Values that do not fit: " }), c.misfits.join(" · ")) : "",
+      el("h3", { text: "Examples" }), el("div", { class: "small", text: c.examples.join(" · ") || "none" }),
+      c.misfits.length ? el("div", { class: "small", style: "margin-top:6px" }, el("b", { text: "Don't fit: " }), c.misfits.join(" · ")) : "",
+      el("details", { class: "why", style: "margin-top:8px" }, el("summary", { text: "Why I think so" }), el("ul", {}, ...c.evidence.map((e) => el("li", { text: e })))),
       c.findings.length ? el("h3", { text: "Issues" }) : "",
       ...c.findings.map(findingNode),
       el("div", { class: "suggest" },
-        el("button", { class: "small", text: "Talk about this column", onclick: () => { selected.add(name); render(overview); $("ask").focus(); } }),
+        el("button", { class: "small", text: "Ask about this column", onclick: () => { selected.add(name); render(overview); $("ask").focus(); } }),
         el("button", { class: "small", text: "Summarise", onclick: () => send("summarise " + name, [name]) })));
     card.classList.remove("hidden");
   }
 
   function findingNode(f) {
-    return el("div", { class: "msg", style: "margin:6px 0" },
-      el("div", {}, el("span", { class: "tag " + f.severity, text: f.severity }), " ", el("b", { text: f.title })),
-      el("div", { class: "hint", text: f.detail }),
-      f.examples.length ? el("div", { class: "hint", text: "Examples: " + f.examples.slice(0, 5).join(" · ") }) : "",
+    return el("div", { class: "finding " + f.severity },
+      el("div", {}, el("span", { class: "pill " + f.severity, text: f.severity }), " ", el("span", { class: "t", text: f.title })),
+      el("div", { class: "d", text: f.detail }),
+      f.examples.length ? el("div", { class: "d", text: "e.g. " + f.examples.slice(0, 4).join(" · ") }) : "",
       f.fixes.length ? el("div", { class: "suggest" }, ...f.fixes.map((op) => el("button", { class: "small", text: "Preview fix: " + opLabel(op),
-        onclick: async () => { try { addProposal(await post(sp("/proposals"), { op })); } catch (e) { say(e.message, "bad"); } } }))) : "");
+        onclick: async () => { try { addProposal(await post(sp("/proposals"), { op, source: "finding" })); } catch (e) { say(e.message, "bad"); } } }))) : "");
   }
   const opLabel = (op) => op.op.replace(/_/g, " ") + (op.order ? " (" + op.order.replace("_", " ") + ")" : "");
 
   // ---------- conversation ----------
-  function say(text, kind) {
-    const m = el("div", { class: "msg" + (kind ? " " : "") }, kind ? el("div", { class: "status " + kind, text }) : el("div", { text }));
-    $("thread").append(m); m.scrollIntoView({ behavior: "smooth", block: "end" });
-  }
+  function push(node) { const w = $("welcome"); if (w) w.remove(); $("thread").append(node); node.scrollIntoView({ behavior: "smooth", block: "end" }); return node; }
+  function say(text, kind) { push(el("div", { class: "msg bot" }, kind ? el("div", { class: "status " + kind, text, style: "margin:0" }) : el("div", { text }))); }
 
   async function send(text, columns) {
     text = (text || "").trim();
     if (!text) return;
-    $("thread").append(el("div", { class: "msg user", text: text + (columns.length ? "  [" + columns.join(", ") + "]" : "") }));
+    push(el("div", { class: "msg user", text: text + (columns.length ? "  · " + columns.join(", ") : "") }));
     $("send").disabled = true;
+    const thinking = push(el("div", { class: "msg bot muted", text: "Thinking…" }));
     try {
       const r = await post(sp("/ask"), { text, columns, model: $("model").value });
+      thinking.remove();
       renderAnswer(r);
-    } catch (e) { say(e.message, "bad"); }
+    } catch (e) { thinking.remove(); say(e.message, "bad"); }
     finally { $("send").disabled = false; }
   }
   $("send").addEventListener("click", () => { const t = $("ask").value; $("ask").value = ""; send(t, [...selected]); });
@@ -336,82 +459,94 @@
     for (const p of r.proposals || []) addProposal(p);
     for (const res of r.results || []) addResult(res);
     if (r.kind === "clarify") addQuestion(r);
-    if (r.findings) addFindings(r.findings);
+    if (r.findings && (r.findings.length || !r.message)) addFindings(r.findings);
     if (r.kind === "report") window.open(withToken(sp("/report")), "_blank");
     if (r.kind === "dashboard") window.open(withToken(sp("/dashboard")), "_blank");
-    $("thread").lastElementChild && $("thread").lastElementChild.scrollIntoView({ behavior: "smooth", block: "end" });
   }
 
   function addQuestion(r) {
-    const box = el("div", { class: "msg" }, el("b", { text: r.question }));
     const buttons = el("div", { class: "suggest" });
     for (const o of r.options || []) {
       buttons.append(el("button", { class: "small", text: o.label, onclick: async () => {
         try {
-          if (o.op) addProposal(await post(sp("/proposals"), { op: o.op }));
+          if (o.op) addProposal(await post(sp("/proposals"), { op: o.op, source: "choice" }));
           else if (o.query) addResult(await post(sp("/query"), { query: o.query }));
           else if (o.ask_value) {
             const v = window.prompt("Value to fill with:");
-            if (v !== null && v.trim()) addProposal(await post(sp("/proposals"), { op: { ...o.ask_value, value: v.trim() } }));
+            if (v !== null && v.trim()) addProposal(await post(sp("/proposals"), { op: { ...o.ask_value, value: v.trim() }, source: "choice" }));
           } else if (o.message) say(o.message);
         } catch (e) { say(e.message, "bad"); }
       } }));
     }
-    box.append(buttons);
-    $("thread").append(box);
+    push(el("div", { class: "msg bot" }, el("b", { text: r.question }), buttons));
   }
 
   function addFindings(findings) {
     const box = el("div", { class: "msg" }, el("b", { text: findings.length ? `${findings.length} findings, most important first` : "No findings." }));
     for (const f of findings.slice(0, 12)) box.append(findingNode(f));
-    if (findings.length > 12) box.append(el("div", { class: "hint", text: `${findings.length - 12} more in the report.` }));
-    $("thread").append(box);
+    if (findings.length > 12) box.append(el("div", { class: "muted small", text: `${findings.length - 12} more in the report.` }));
+    push(box);
+  }
+
+  function confidenceNode(c) {
+    if (!c) return "";
+    const bar = (v, cls) => el("span", { class: "bar" }, el("span", { class: cls, style: `width:${Math.round(v * 100)}%` }));
+    const lvl = (v) => v >= 0.85 ? "high" : v >= 0.6 ? "medium" : "low";
+    return el("div", {},
+      el("div", { class: "conf" }, el("span", { class: "small muted", text: "Confidence" }), bar(c.score, "conf-" + c.level),
+        el("span", {}, el("b", { text: pct(c.score) }), " ", el("span", { class: "pill " + c.level, text: c.level }))),
+      el("div", { class: "small muted", text: c.summary }),
+      el("details", { class: "why" }, el("summary", { text: "Why this score?" }),
+        ...c.factors.map((f) => el("div", { class: "factor" }, el("span", { text: f.name }), bar(f.value, "conf-" + lvl(f.value)),
+          el("span", { class: "muted", text: pct(f.value) + " · " + f.why })))));
   }
 
   function addProposal(p) {
     const e = p.effect;
-    const box = el("div", { class: "msg" });
-    const counts = [`${e.cells_changed} cells in ${e.rows_changed} rows change`];
-    if (e.rows_removed) counts.push(`${e.rows_removed} rows are removed`);
+    const counts = [];
+    if (e.cells_changed) counts.push(`${plural(e.cells_changed, "cell")} in ${plural(e.rows_changed, "row")} change`);
+    if (e.rows_removed) counts.push(`${plural(e.rows_removed, "row")} removed`);
     if (e.columns_added.length) counts.push("new columns: " + e.columns_added.join(", "));
-    if (e.columns_removed.length) counts.push("removed column: " + e.columns_removed.join(", "));
-    if (e.renamed) counts.push(`renamed ${e.renamed[0]} → ${e.renamed[1]}`);
+    if (e.columns_removed.length) counts.push("removes column " + e.columns_removed.join(", "));
+    if (e.renamed) counts.push(`renames ${e.renamed[0]} → ${e.renamed[1]}`);
+    if (!counts.length) counts.push("nothing would change");
     const examples = e.examples.length ? el("div", { class: "wide" }, el("table", {},
       el("thead", {}, el("tr", {}, el("th", { text: "Row" }), el("th", { text: "Column" }), el("th", { text: "Before" }), el("th", { text: "After" }))),
-      el("tbody", {}, ...e.examples.map((x) => el("tr", {}, el("td", { text: String(x.row) }), el("td", { text: x.column }),
+      el("tbody", {}, ...e.examples.slice(0, 6).map((x) => el("tr", {}, el("td", { text: String(x.row) }), el("td", { text: x.column }),
         el("td", {}, el("span", { class: "before", text: x.before || "(empty)" })), el("td", {}, el("span", { class: "after", text: x.after || "(empty)" }))))))) : "";
     const result = el("div");
-    const approve = el("button", { class: "primary small", text: p.risk === "destructive" ? "Approve (removes or fills data)" : "Approve" });
-    const reject = el("button", { class: "small", text: "Reject" });
+    const approve = el("button", { class: "primary", text: p.risk === "destructive" ? "Approve (removes or fills data)" : "Approve" });
+    const reject = el("button", { text: "Reject" });
     const decide = async (decision) => {
       approve.disabled = reject.disabled = true;
       try {
         const r = await post(sp("/proposals/" + p.id), { decision, reviewer: reviewer() });
-        if (decision === "reject") { status(result, "warn", "Rejected. Nothing changed."); return; }
+        if (decision === "reject") { status(result, "warn", "Rejected. Nothing changed. I'll be less sure of this kind of change next time."); return; }
         const v = r.validation;
-        let text = `Applied. Rows ${v.rows_before} → ${v.rows_after}; errors ${v.errors_before} → ${v.errors_after}; anomalies ${v.anomalies_before} → ${v.anomalies_after}.`;
-        if (v.resolved.length) text += " Resolved: " + v.resolved.join("; ") + ".";
-        if (v.new.length) text += " New: " + v.new.join("; ") + ".";
+        const text = `Done ✓  Errors ${v.errors_before} → ${v.errors_after} · anomalies ${v.anomalies_before} → ${v.anomalies_after}` +
+          (v.rows_before !== v.rows_after ? ` · rows ${v.rows_before.toLocaleString()} → ${v.rows_after.toLocaleString()}` : "");
         status(result, "ok", text);
+        if (v.resolved.length || v.new.length) result.append(el("details", { class: "why", style: "margin-top:6px" },
+          el("summary", { text: "What changed in the checks" }),
+          v.resolved.length ? el("div", { class: "small" }, el("b", { text: "Gone: " }), v.resolved.join(" · ")) : "",
+          v.new.length ? el("div", { class: "small" }, el("b", { text: "New or different: " }), v.new.join(" · ")) : ""));
         await refresh();
       } catch (err) { status(result, "bad", err.message); approve.disabled = reject.disabled = false; }
     };
     approve.addEventListener("click", () => decide("approve"));
     reject.addEventListener("click", () => decide("reject"));
-    box.append(
-      el("div", {}, el("span", { class: "tag " + p.risk, text: p.risk === "low" ? "safe" : p.risk }), " ", el("b", { text: p.title })),
-      el("div", { class: "hint", text: p.risk_text }),
-      el("div", { text: counts.join("; ") + "." }),
-      e.notes.length ? el("ul", { class: "hint" }, ...e.notes.map((n) => el("li", { text: n }))) : "",
-      e.unmatched.length ? el("div", { class: "hint", text: "Left unchanged: " + e.unmatched.map((u) => `${u.value} (${u.count})`).join(" · ") }) : "",
+    const riskName = p.risk === "low" ? "safe" : p.risk === "review" ? "check it" : "removes data";
+    push(el("div", { class: "msg proposal" },
+      el("div", { class: "head" }, el("span", { class: "pill " + (p.risk === "low" ? "safe" : p.risk), text: riskName }), el("span", { text: p.title })),
+      confidenceNode(p.confidence),
+      el("div", { class: "effect" }, el("b", { text: counts.join(" · ") + "." }), el("div", { class: "small muted", text: p.risk_text })),
+      e.notes.length ? el("ul", { class: "small muted" }, ...e.notes.map((n) => el("li", { text: n }))) : "",
+      e.unmatched.length ? el("div", { class: "small muted", text: "Left as they are: " + e.unmatched.map((u) => `${u.value} (${u.count})`).join(" · ") }) : "",
       examples,
-      el("div", { class: "suggest" }, approve, reject), result);
-    $("thread").append(box);
-    box.scrollIntoView({ behavior: "smooth", block: "end" });
+      el("div", { class: "decide" }, approve, reject), result));
   }
 
   function addResult(r) {
-    const box = el("div", { class: "msg" });
     const holder = el("div");
     holder.innerHTML = r.svg || "";  // drawn on the server from computed numbers; labels escaped there
     const t = r.table;
@@ -420,34 +555,33 @@
       el("tbody", {}, ...t.rows.slice(0, 12).map((row) => el("tr", {}, ...row.map((v) => el("td", { text: String(v) }))))))) : "";
     const pin = el("button", { class: "small", text: "Add to dashboard" });
     pin.addEventListener("click", async () => {
-      try { await post(sp("/pins"), { query: r.query, title: r.title }); pin.textContent = "Added"; pin.disabled = true; await refresh(); }
+      try { await post(sp("/pins"), { query: r.query, title: r.title }); pin.textContent = "Added ✓"; pin.disabled = true; await refresh(); }
       catch (e) { say(e.message, "bad"); }
     });
-    box.append(
-      el("div", {}, el("span", { class: "tag " + (r.estimate ? "estimate" : "ok"), text: r.estimate ? "estimate" : "calculated" }), " ", el("b", { text: r.title })),
+    push(el("div", { class: "msg" },
+      el("div", { class: "head", style: "font-weight:600" }, el("span", { class: "pill " + (r.estimate ? "estimate" : "ok"), text: r.estimate ? "estimate" : "calculated" }), " ", r.title),
       holder,
+      r.confidence ? confidenceNode(r.confidence) : "",
       el("ul", {}, ...r.facts.map((f) => el("li", { text: f }))),
-      r.caveats.length ? el("ul", { class: "hint" }, ...r.caveats.map((c) => el("li", { text: c }))) : "",
-      table, el("div", { class: "suggest" }, pin));
-    $("thread").append(box);
+      r.caveats.length ? el("ul", { class: "small muted" }, ...r.caveats.map((c) => el("li", { text: c }))) : "",
+      table, el("div", { class: "suggest" }, pin)));
   }
 
-  // ---------- history and undo ----------
-  $("undo").addEventListener("click", async (ev) => {
-    ev.preventDefault();
-    try { const r = await post(sp("/undo"), { reviewer: reviewer() }); say(`Undid: ${opLabel(r.undone)} on ${r.undone.column || "the table"}. ${r.steps} steps remain.`, "warn"); await refresh(); }
+  // ---------- toolbar ----------
+  $("dashBtn").addEventListener("click", () => window.open(withToken(sp("/dashboard")), "_blank"));
+  $("reportBtn").addEventListener("click", () => window.open(withToken(sp("/report")), "_blank"));
+  $("undo").addEventListener("click", async () => {
+    try { const r = await post(sp("/undo"), { reviewer: reviewer() }); say(`Undid: ${opLabel(r.undone)} on ${r.undone.column || "the table"}. ${r.steps} changes remain.`, "warn"); await refresh(); }
     catch (e) { say(e.message, "bad"); }
   });
-  $("showHistory").addEventListener("click", async (ev) => {
-    ev.preventDefault();
-    const h = (await api(sp("/history"))).history;
-    const rows = h.map((x) => el("tr", {}, el("td", { text: x.at.replace("T", " ").slice(0, 19) }), el("td", { text: x.event }),
+  $("showHistory").addEventListener("click", async () => {
+    const h = (await api(sp("/history"))).history.filter((x) => x.event !== "proposed");
+    const rows = h.map((x) => el("tr", {}, el("td", { text: x.at.replace("T", " ").slice(5, 16) }), el("td", { text: x.event }),
       el("td", { text: x.op ? opLabel(x.op) + (x.op.column ? " · " + x.op.column : "") : (x.column || x.filename || "") }),
       el("td", { text: x.cells != null ? `${x.cells} cells` + (x.rows_removed ? `, ${x.rows_removed} rows removed` : "") : "" }),
       el("td", { text: x.actor || "" })));
-    $("thread").append(el("div", { class: "msg" }, el("b", { text: "History" }), el("div", { class: "wide" }, el("table", {},
+    push(el("div", { class: "msg" }, el("b", { text: "History" }), el("div", { class: "wide" }, el("table", {},
       el("thead", {}, el("tr", {}, ...["When", "Event", "What", "Effect", "By"].map((c) => el("th", { text: c })))), el("tbody", {}, ...rows)))));
-    $("thread").lastElementChild.scrollIntoView({ behavior: "smooth", block: "end" });
   });
 })();
 </script>

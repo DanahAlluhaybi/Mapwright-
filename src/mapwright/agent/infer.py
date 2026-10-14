@@ -237,9 +237,11 @@ def infer_column(name: str, values: list[str]) -> ColumnInfo:
         integral = all(x == x.to_integral_value() for x in good)
         info.stats = _numeric_stats(good)
         misfits = [v for v, x in zip(filled, numbers) if x is None]
-        looks_id = integral and len(counts) >= 0.9 * n and n > 1 and info.meaning == "an identifier or reference number"
+        long_codes = min(len(re.sub(r"\D", "", v)) for v in filled if parse_number(v, UNITS)) >= 6 if good else False
+        looks_id = integral and n > 1 and info.meaning == "an identifier or reference number" and (len(counts) >= 0.9 * n or long_codes)
         if looks_id:
-            return settle("identifier", "identifier", number_hits, misfits, "are distinct whole numbers in a column named like an identifier")
+            why = "are distinct whole numbers" if len(counts) >= 0.9 * n else "are long whole numbers"
+            return settle("identifier", "identifier", number_hits, misfits, why + " in a column named like an identifier")
         return settle("integer" if integral else "decimal", "measure", number_hits, misfits, "read as numbers")
 
     if len(counts) >= 0.9 * n and n > 1:

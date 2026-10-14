@@ -44,13 +44,29 @@ Start it like the rest of Mapwright (`start.bat`, or
    values) or *destructive* (removes or fills data). Nothing runs until you
    approve it. After it runs, the data is checked again and the page says
    which findings were resolved and whether any new ones appeared.
+
+   Each proposal also shows a **confidence** score with its reasons
+   ("Why this score?"). It multiplies a few plain factors: how the request
+   became this step (a check on the data 95%, an option you picked 100%, a
+   built-in phrase 90%, an AI model 75%); how much of the column the step
+   handles (values it cannot convert lower it); how clearly the column is
+   of the expected type; date order that could be read two ways; removed
+   rows that differ from the kept ones; filled values that are estimates;
+   and your earlier approvals and rejections of the same kind of step in
+   this session. High is 85% or more, low is under 60%. It is a guide for
+   the reviewer, not a measured probability. Forecasts get one from their
+   test error.
 5. **Analyse.** Results say whether they are *calculated* or an
    *estimate*. Relationships carry a note that they do not show cause.
    Forecasts are only made with at least 8 periods of history, choose
    between three simple methods by testing on the last periods they did not
    see, and show the error. An incomplete last period is pointed out (and
    left out of forecasts).
-6. **Share.** *Add to dashboard* keeps a result. The dashboard can be
+6. **Share.** The dashboard shows the quality ring, column health (how
+   much of each column fits its type, does not fit, or is missing; weakest
+   first), the top issues, a progress chart of errors and anomalies after
+   each approved step, and every decision with its confidence and who made
+   it. *Add to dashboard* keeps an analysis result there; those results can be
    filtered by a category or a date range; the report collects the profile,
    the findings, every step with its effect, and the kept results. Download
    the cleaned CSV or Excel file, and the steps as a plan.

@@ -467,9 +467,12 @@ def q_forecast(typed: Typed, rows, spec) -> dict:
         "Compared with: " + "; ".join(f"{k} {fmt(v)}" for k, v in errors.items() if k != best) + ".",
         f"Estimate for {future[0]}: {fmt(forecast[0])}" + (f"; for {future[-1]}: {fmt(forecast[-1])}." if horizon > 1 else "."),
     ]
+    from .confidence import score_forecast
+
     return {
         "title": f"Forecast of {label} per {period} (estimate)",
         "estimate": True,
+        "confidence": score_forecast(errors[best] / scale),
         "chart": {"type": "line", "labels": labels + future,
                   "series": [{"name": label, "values": [None if math.isnan(v) else v for v in values] + [None] * horizon},
                              {"name": "estimate", "values": [None] * (len(labels) - 1) + [values[-1]] + forecast}],

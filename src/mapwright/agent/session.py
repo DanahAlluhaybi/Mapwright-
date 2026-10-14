@@ -173,18 +173,22 @@ class Session:
     # Proposals -------------------------------------------------------------
 
     def propose(self, spec: dict, source: str = "user") -> dict:
-        table, _ = self.state()
+        from .confidence import score_proposal
+
+        table, columns = self.state()
         try:
             preview = ops.preview(table, ops.check(spec))
         except ops.OpError as error:
             raise SessionError(str(error)) from error
         pid = "p" + secrets.token_hex(4)
-        proposal = {"id": pid, "status": "pending", "source": source, "created": now(), "base_steps": len(self.plan), **preview}
+        proposal = {"id": pid, "status": "pending", "source": source, "created": now(), "base_steps": len(self.plan), **preview,
+                    "confidence": score_proposal(preview["op"], preview["effect"], source, columns, self.history())}
         with self.lock:
             proposals = self._read("proposals.json", {})
             proposals[pid] = proposal
             self._write("proposals.json", proposals)
             self._log("history.jsonl", {"event": "proposed", "id": pid, "op": spec, "source": source,
+                                        "confidence": proposal["confidence"]["score"],
                                         "cells": preview["effect"]["cells_changed"], "rows_removed": preview["effect"]["rows_removed"]})
         return proposal
 
@@ -248,6 +252,14 @@ class Session:
         if result["kind"] == "clarify":
             response["question"] = result.get("question")
             response["options"] = result.get("options", [])
+        if result["kind"] == "duplicates":
+            wanted = set(result.get("columns") or [])
+            kinds = {"duplicate_rows", "duplicate_except_id", "duplicate_values", "near_duplicates", "spellings"}
+            response["findings"] = [f for f in all_findings(table, columns) if f["kind"] in kinds
+                                    and (not wanted or not f["column"] or set(f["column"].split(", ")) & wanted)]
+            if not response["findings"]:
+                response["message"] = (result["message"] + " None of these found any duplicates. If you know some exist, "
+                                       "tell me which column identifies a record (for example the supplier number or tax number).")
         if result["kind"] == "findings" or result.get("findings"):
             wanted = set(result.get("columns") or [])
             response["findings"] = [f for f in all_findings(table, columns)

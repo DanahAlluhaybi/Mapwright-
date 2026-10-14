@@ -25,7 +25,29 @@ from .table import Table
 EXAMPLES = 6
 
 
+SINGULAR = [(" are ", " is "), (" appear ", " appears "), (" look ", " looks "), (" repeat ", " repeats "),
+            (" match ", " matches "), (" have ", " has ")]
+
+
+def _singular(title: str) -> str:
+    """'1 values in X are not ...' reads as '1 value in X is not ...'."""
+    m = re.match(r"1 (unusually large or small )?(\w+?)s\b", title)
+    if not m:
+        return title
+    title = title[: m.end() - 1] + title[m.end():]
+    for plural, single in SINGULAR:
+        if plural in title:
+            title = title.replace(plural, single, 1)
+            break
+    m = re.search(r" is not (.+?)s$", title)
+    if m:
+        article = "an" if m.group(1)[0].lower() in "aeiou" else "a"
+        title = title[: m.start()] + f" is not {article} {m.group(1)}"
+    return title
+
+
 def _finding(column, severity, kind, title, detail, count, examples=None, fixes=None, rows=None) -> dict:
+    title = _singular(title)
     return {
         "id": f"{kind}:{column or '*'}",
         "column": column,
@@ -166,15 +188,84 @@ def column_findings(table: Table, info: ColumnInfo) -> list[dict]:
                 [{"op": "map_values", "column": name, "mapping": mapping}],
             ))
 
-    if info.type == "identifier" or info.role == "identifier":
+    if _key_like(info):
         counts = Counter(match_key(v) for v in filled)
         repeated = {k: c for k, c in counts.items() if c > 1}
         if repeated:
             rows = [rid for rid, v in zip(table.row_ids, values) if match_key(v) in repeated]
-            out.append(_finding(name, "error", "duplicate_ids", f"{len(repeated)} identifiers in {name} appear more than once",
-                                "An identifier should point to one record. Check whether these are duplicates or different records.",
-                                sum(repeated.values()), list(repeated), [{"op": "deduplicate", "columns": [name]}], rows))
+            strict = info.type == "identifier" or info.role == "identifier" or KEY_WORDS.search(words(name))
+            what = "identifiers" if strict else "values"
+            out.append(_finding(
+                name, "error" if strict else "anomaly", "duplicate_values",
+                f"{len(repeated)} {what} in {name} appear more than once ({sum(repeated.values())} rows)",
+                ("An identifier should point to one record. " if strict else
+                 "Several rows share the same value; they may be the same record entered twice. ")
+                + "Compare the rows before removing any.",
+                sum(repeated.values()), [f"{k} ×{c}" for k, c in sorted(repeated.items(), key=lambda kv: -kv[1])],
+                [{"op": "deduplicate", "columns": [name]}], rows))
+        if info.role in ("name", "text") or info.meaning == "a name":
+            out.extend(_near_duplicates(table, name, values))
     return out
+
+
+# Duplicate detection --------------------------------------------------------
+
+KEY_WORDS = re.compile(
+    r"\b(id|code|no|nr|number|ref|key|sku|vat|tax|tin|trn|cr|iban|account|registration|license|licence)\b"
+    r"|رقم|كود|ضريب|سجل|ايبان|حساب|ترخيص"
+)
+LEGAL_WORDS = {
+    "co", "company", "corp", "corporation", "inc", "llc", "ltd", "limited", "est", "establishment", "trading",
+    "group", "the", "and", "for", "of", "plc", "wll", "llp", "intl", "international",
+    "شركة", "شركه", "مؤسسة", "مؤسسه", "للتجارة", "للتجاره", "التجارية", "التجاريه", "المحدودة", "المحدوده", "ذمم", "و",
+}
+
+
+def _key_like(info: ColumnInfo) -> bool:
+    """Columns where a repeated value usually means a repeated record."""
+    if info.type in ("identifier", "email", "phone") or info.role in ("identifier", "name"):
+        return True
+    if info.meaning in ("an identifier or reference number", "a name", "an email address", "a phone number"):
+        return info.type not in ("category", "boolean", "date")
+    return bool(KEY_WORDS.search(words(info.name))) and info.type not in ("boolean", "date")
+
+
+def name_key(text: str) -> str:
+    """A loose form of a name for spotting near-duplicates: case, punctuation,
+    Arabic letter variants and legal words such as "Co." or "شركة" are ignored."""
+    t = text.casefold()
+    t = re.sub("[أإآ]", "ا", t).replace("ة", "ه").replace("ى", "ي")
+    t = re.sub(r"[^\w\s]|_", " ", t)
+    parts = [w.removeprefix("ال") if len(w) > 4 and w.startswith("ال") else w for w in t.split()]
+    parts = [w for w in parts if w not in LEGAL_WORDS]
+    return " ".join(parts)
+
+
+def _near_duplicates(table: Table, name: str, values: list[str]) -> list[dict]:
+    groups: dict[str, Counter] = defaultdict(Counter)
+    rows: dict[str, list[int]] = defaultdict(list)
+    for rid, v in zip(table.row_ids, values):
+        if v.strip() and not is_null(v):
+            key = name_key(v)
+            if key:
+                groups[key][clean_spaces(v)] += 1
+                rows[key].append(rid)
+    # only spellings that differ beyond case and spacing; those are the "spellings" finding
+    near = {k: c for k, c in groups.items() if len({match_key(s) for s in c}) > 1}
+    if not near:
+        return []
+    mapping = {}
+    for counter in near.values():
+        keep = counter.most_common(1)[0][0]
+        mapping.update({s: keep for s in counter if s != keep})
+    return [_finding(
+        name, "anomaly", "near_duplicates", f"{len(near)} names in {name} look like the same entity written differently",
+        "Ignoring case, punctuation, Arabic letter variants and words like Co., Ltd, شركة, مؤسسة. "
+        "Check them: unifying the spelling makes duplicates visible, removing rows is a separate step.",
+        sum(sum(c.values()) for c in near.values()), [" / ".join(c) for c in near.values()],
+        [{"op": "map_values", "column": name, "mapping": mapping}],
+        [r for k in near for r in rows[k]],
+    )]
 
 
 def _misfit(info: ColumnInfo, value: str) -> bool:
@@ -218,6 +309,26 @@ def table_findings(table: Table, columns: list[ColumnInfo]) -> list[dict]:
         out.append(_finding(None, "anomaly", "duplicate_rows", f"{len(dupes)} rows repeat an earlier row exactly",
                             "Every value matches an earlier row (ignoring case and spaces).", len(dupes),
                             [f"row {r}" for r in dupes], [{"op": "deduplicate"}], dupes))
+    # the same record entered twice under two different IDs: equal in everything but the ID columns
+    ids = [i for i, c in enumerate(columns) if c.type == "identifier" or c.role == "identifier"]
+    rest = [i for i in range(len(columns)) if i not in ids and columns[i].type != "empty"]
+    if ids and len(rest) >= 2:
+        seen2, twins = {}, []
+        for rid, row in zip(table.row_ids, table.rows):
+            key = tuple(match_key(row[i]) for i in rest)
+            if not any(key):
+                continue
+            if key in seen2 and tuple(match_key(row[i]) for i in ids) != seen2[key][1]:
+                twins.append((seen2[key][0], rid))
+            else:
+                seen2.setdefault(key, (rid, tuple(match_key(row[i]) for i in ids)))
+        if twins:
+            id_names = ", ".join(columns[i].name for i in ids)
+            out.append(_finding(None, "anomaly", "duplicate_except_id",
+                                f"{len(twins)} rows match another row in everything except {id_names}",
+                                "Often the same record created twice with a new ID. Merging them needs a decision about which ID to keep.",
+                                len(twins), [f"rows {a} and {b}" for a, b in twins],
+                                [{"op": "deduplicate", "columns": [columns[i].name for i in rest]}], [b for _, b in twins]))
     out.extend(_date_order_checks(table, columns))
     return out
 

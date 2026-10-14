@@ -144,6 +144,82 @@ class QualityTest(unittest.TestCase):
         self.assertIn("currencies", findings)
 
 
+SUPPLIERS = """Supplier ID,Supplier Name,VAT Number,City,Payment Terms,Email
+S-001,ABC Trading Co.,300123456700003,Jeddah,30,info@abc.com
+S-002,abc trading company,300123456700003,Jeddah,30,info@abc.com
+S-003,شركة النور للتجارة,300999888700003,Riyadh,60,sales@alnoor.sa
+S-004,مؤسسة نور,300555444700003,Riyadh,60,contact@noor.sa
+S-005,Gulf Supplies LLC,300777666700003,Dammam,90,ap@gulf.com
+S-006,Gulf Supplies LLC,300777666700003,Dammam,90,ap@gulf.com
+S-007,Red Sea Logistics,300111222700003,Jeddah,30,ops@redsea.com
+"""
+
+
+class DuplicateTest(unittest.TestCase):
+    def test_duplicates_beyond_identical_rows(self):
+        table = table_from(SUPPLIERS)
+        columns = infer_table(table)
+        self.assertEqual({c.name: c.type for c in columns}["VAT Number"], "identifier")
+        found = {(f["kind"], f["column"]): f for f in all_findings(table, columns)}
+        self.assertNotIn(("duplicate_rows", None), found)  # no row is identical: the IDs differ
+        self.assertEqual(found[("duplicate_values", "VAT Number")]["severity"], "error")
+        self.assertIn(("duplicate_values", "Email"), found)
+        self.assertEqual(found[("duplicate_except_id", None)]["rows"], [6])
+        near = found[("near_duplicates", "Supplier Name")]
+        self.assertIn("ABC Trading Co. / abc trading company", near["examples"])
+        self.assertIn("شركة النور للتجارة / مؤسسة نور", near["examples"])
+
+    def test_asking_about_duplicates_shows_them_instead_of_removing(self):
+        store = SessionStore(Path(tempfile.mkdtemp()))
+        session = store.create(SUPPLIERS.encode("utf-8"), "suppliers.csv")
+        answer = session.ask("are there duplicates?", [])
+        self.assertEqual(answer["kind"], "duplicates")
+        self.assertNotIn("proposals", answer)
+        self.assertGreaterEqual(len(answer["findings"]), 4)
+        answer = session.ask("remove duplicates in VAT Number", [])
+        self.assertEqual(answer["proposals"][0]["effect"]["rows_removed"], 2)
+
+
+class ConfidenceTest(unittest.TestCase):
+    def setUp(self):
+        self.session = SessionStore(Path(tempfile.mkdtemp())).create(SALES.encode("utf-8"), "sales.csv")
+
+    def test_every_proposal_explains_its_confidence(self):
+        p = self.session.propose({"op": "normalize_text", "column": "channel", "case": "title"}, source="finding")
+        c = p["confidence"]
+        self.assertEqual(c["level"], "high")
+        self.assertEqual(c["factors"][0]["name"], "Understanding")
+        self.assertTrue(0 < c["score"] <= 1)
+
+    def test_values_that_cannot_be_converted_lower_it(self):
+        clean = self.session.propose({"op": "parse_number", "column": "amount"}, source="choice")["confidence"]
+        messy = SessionStore(Path(tempfile.mkdtemp())).create(b"id,amount\n1,10\n2,lots\n3,many\n4,20\n5,some\n", "m.csv")
+        rough = messy.propose({"op": "parse_number", "column": "amount"}, source="choice")["confidence"]
+        self.assertGreater(clean["score"], rough["score"])
+        self.assertEqual(rough["level"], "low")
+        self.assertIn("cannot be converted", rough["summary"])
+
+    def test_a_model_reading_is_less_certain_than_your_choice(self):
+        spec = {"op": "normalize_text", "column": "channel"}
+        mine = self.session.propose(spec, source="choice")["confidence"]["score"]
+        model = self.session.propose(spec, source="ollama/qwen2.5:7b")["confidence"]["score"]
+        self.assertLess(model, mine)
+
+    def test_earlier_rejections_count(self):
+        spec = {"op": "fill_missing", "column": "region", "strategy": "constant", "value": "North"}
+        first = self.session.propose(spec, source="choice")
+        self.session.decide(first["id"], "reject", "me")
+        second = self.session.propose(spec, source="choice")["confidence"]
+        self.assertIn("Your decisions", [f["name"] for f in second["factors"]])
+        self.assertLess(second["score"], first["confidence"]["score"])
+
+    def test_dedup_conflicts_lower_it(self):
+        session = SessionStore(Path(tempfile.mkdtemp())).create(SUPPLIERS.encode("utf-8"), "s.csv")
+        c = session.propose({"op": "deduplicate", "columns": ["VAT Number"]})["confidence"]
+        self.assertIn("Data loss", [f["name"] for f in c["factors"]])
+        self.assertLess(c["score"], 1)
+
+
 class AnalysisTest(unittest.TestCase):
     def setUp(self):
         self.table = table_from(SALES)
@@ -265,6 +341,8 @@ class SessionTest(unittest.TestCase):
         html = build_dashboard(self.session, [])
         self.assertIn("Rows by City", html)
         self.assertIn("<svg", html)
+        for section in ("Column health", "Top issues", "Progress", "Decisions", 'class="donut"'):
+            self.assertIn(section, html)
         report = build_report(self.session)
         for section in ("What the file contains", "Data quality", "Changes", "Analysis"):
             self.assertIn(section, report)

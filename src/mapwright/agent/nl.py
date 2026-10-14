@@ -132,11 +132,13 @@ def interpret_rules(text: str, selected: list[str], table: Table, columns: list[
         return result
 
     # --- duplicates ----------------------------------------------------------
-    if _has(t, r"duplicat|repeated|مكرر|تكرار"):
-        spec = {"op": "deduplicate"}
-        if cols:
-            spec["columns"] = cols
-        return {"kind": "proposal", "ops": [spec]}
+    if _has(t, r"duplicat|repeated|same (supplier|customer|record)|مكرر|تكرار|دبل"):
+        if cols and _has(t, r"remove|delete|drop|احذف|شيل"):
+            return {"kind": "proposal", "ops": [{"op": "deduplicate", "columns": cols}]}
+        return {"kind": "duplicates", "columns": cols, "message": (
+            "I checked for: whole rows repeated, rows equal except for their ID, repeated values in identifier, "
+            "name, email, phone and tax or registration columns, and names written differently. "
+            "Nothing is removed until you preview and approve a fix.")}
 
     # --- conversions on columns ---------------------------------------------
     conversions = [

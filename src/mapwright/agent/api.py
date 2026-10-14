@@ -106,7 +106,8 @@ class AgentAPI:
                 answer["note"] = note
             h._json(HTTPStatus.OK, answer)
         elif rest == ["proposals"] and method == "POST":
-            h._json(HTTPStatus.CREATED, session.propose(body.get("op"), source="page"))
+            h._json(HTTPStatus.CREATED, session.propose(
+                body.get("op"), source=body.get("source") if body.get("source") in ("finding", "choice") else "page"))
         elif rest[:1] == ["proposals"] and len(rest) == 2 and method == "POST":
             h._json(HTTPStatus.OK, session.decide(rest[1], str(body.get("decision", "")), reviewer, str(body.get("note") or "")))
         elif rest == ["undo"] and method == "POST":

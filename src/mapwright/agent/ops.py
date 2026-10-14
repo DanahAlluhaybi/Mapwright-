@@ -36,6 +36,7 @@ class Effect:
     columns_removed: list[str] = field(default_factory=list)
     renamed: tuple[str, str] | None = None
     notes: list[str] = field(default_factory=list)
+    stats: dict = field(default_factory=dict)
 
     def summary(self) -> dict:
         examples, seen = [], set()
@@ -58,6 +59,7 @@ class Effect:
             "columns_removed": self.columns_removed,
             "renamed": list(self.renamed) if self.renamed else None,
             "notes": self.notes,
+            "stats": self.stats,
         }
 
 
@@ -355,6 +357,7 @@ def _deduplicate(table: Table, spec: dict) -> tuple[Table, Effect]:
         out.rows.append(list(row))
         out.row_ids.append(rid)
     effect.notes.append(f"keeps the first row for each {'whole row' if len(columns) == len(table.columns) else ', '.join(columns)}")
+    effect.stats["conflicts"] = conflicts
     if conflicts:
         effect.notes.append(f"{conflicts} removed rows differ from the kept row in other columns; that data would be lost")
     return out, effect
