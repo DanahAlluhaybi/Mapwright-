@@ -92,6 +92,8 @@ class RunAndReviewTest(ServerTest):
         self.assertEqual(done["review"]["approved"], run["held_ids"])
         self.assertEqual(done["rows"], run["rows"] - held["rows_removed"])
         self.assertEqual(done["rows_before_review"], run["rows"])
+        self.assertIn("Reviewed by Danah: 1 of 1 held action applied.", done["summary_text"])
+        self.assertIn("1 action held for approval", run["summary_text"])
 
         _, csv_body, content_type = self.client.call("GET", f"/runs/{run['id']}/target.csv")
         self.assertTrue(content_type.startswith("text/csv"))

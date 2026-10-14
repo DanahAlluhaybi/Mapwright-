@@ -1,0 +1,18 @@
+{
+  "request": {
+    "prompt": "{\n \"task\": \"Your previous action did not pass validation. Return a corrected action of the same type, or an empty actions list if the values cannot be fixed safely.\",\n \"original_request\": {\n  \"field\": {\n   \"name\": \"credit_limit\",\n   \"type\": \"decimal\",\n   \"required\": false,\n   \"canonical_form\": \"Plain decimal in SAR, two places, no separators or symbols.\",\n   \"range\": [\n    0,\n    1000000\n   ]\n  },\n  \"context\": \"source column(s) ['LIMIT_AMT']\",\n  \"values\": [\n   \"15,500.00/- SAR\",\n   \"220,000.00/- SAR\",\n   \"26,500.00/- SAR\",\n   \"40,000.00/- SAR\",\n   \"405,000.00/- SAR\",\n   \"?\",\n   \"TBD\",\n   \"n.a.\",\n   \"none\",\n   \"غير متوفر\"\n  ],\n  \"allowed_actions\": {\n   \"set_null\": {\n    \"tokens\": [\n     \"<value exactly as shown that stands for a missing value>\"\n    ]\n   },\n   \"parse_number\": {\n    \"units\": {\n     \"<currency token as written, e.g. SR>\": \"<ISO code>\"\n    }\n   }\n  }\n },\n \"previous_action\": {\n  \"type\": \"parse_number\",\n  \"units\": {\n   \"SAR\": \"SAR\"\n  },\n  \"confidence\": 0.9,\n  \"reason\": \"Extracting numeric values from formatted strings including currency code.\"\n },\n \"validation_problems\": [\n  \"still unreadable: '15,500.00/- SAR'\",\n  \"still unreadable: '220,000.00/- SAR'\",\n  \"still unreadable: '26,500.00/- SAR'\",\n  \"still unreadable: '40,000.00/- SAR'\",\n  \"still unreadable: '405,000.00/- SAR'\",\n  \"still unreadable: '?'\",\n  \"still unreadable: 'TBD'\",\n  \"still unreadable: 'n.a.'\",\n  \"still unreadable: 'none'\",\n  \"still unreadable: 'غير متوفر'\"\n ],\n \"values_still_wrong\": [\n  \"15,500.00/- SAR\",\n  \"220,000.00/- SAR\",\n  \"26,500.00/- SAR\",\n  \"40,000.00/- SAR\",\n  \"405,000.00/- SAR\",\n  \"?\",\n  \"TBD\",\n  \"n.a.\",\n  \"none\",\n  \"غير متوفر\"\n ],\n \"answer_schema\": {\n  \"actions\": [\n   {\n    \"type\": \"parse_number\",\n    \"...\": \"parameters\",\n    \"confidence\": \"0..1\"\n   }\n  ]\n }\n}",
+    "system": "You help migrate messy legacy data exports into a fixed target schema.\nYou never write code, SQL or formulas. You answer with one JSON object that\nfollows the schema given in the request, and nothing else.\nWhen you are not sure, say so with a low confidence or leave the item out:\na person reviews uncertain items, and an invented answer is worse than none.",
+    "model": "gemini-3.1-flash-lite",
+    "prompt_version": "revise-v1",
+    "temperature": 0.0,
+    "json_output": true,
+    "sample": 2
+  },
+  "response": {
+    "text": "{\n  \"actions\": [\n    {\n      \"type\": \"parse_number\",\n      \"number_format\": {\n        \"grouping_separator\": \",\",\n        \"decimal_separator\": \".\"\n      },\n      \"ignore_patterns\": [\n        \"/\",\n        \"-\",\n        \"SAR\"\n      ],\n      \"confidence\": 0.95\n    },\n    {\n      \"type\": \"set_null\",\n      \"tokens\": [\n        \"?\",\n        \"TBD\",\n        \"n.a.\",\n        \"none\",\n        \"غير متوفر\"\n      ],\n      \"confidence\": 1.0\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "input_tokens": 817,
+    "output_tokens": 153,
+    "cached": false
+  }
+}

@@ -58,6 +58,10 @@ def _now() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
 
 
+def _count(n: int, noun: str) -> str:
+    return f"{n} {noun}" + ("" if n == 1 else "s")
+
+
 def _table_hash(rows: list[dict[str, str]], numbers: list[int]) -> str:
     payload = json.dumps(list(zip(numbers, rows)), ensure_ascii=False, sort_keys=True)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
@@ -206,10 +210,17 @@ class Service:
             {"issue": e.get("issue"), "target": e.get("target"), "action": e.get("action")} for e in result["escalations"]
         ]
         final_rows = approved_rows if approved_rows is not None else rows
-        text = (
-            f"{meta['filename']} ({meta['contract']}, {meta['system']}): {final_rows} rows, {meta['status']}. "
-            f"{len(held)} actions held for approval, {len(review_items)} items need review."
-        )
+        text = f"{meta['filename']} ({meta['contract']}, {meta['system']}): {final_rows} rows, {meta['status']}. "
+        review = meta.get("review")
+        if review is None:
+            text += f"{_count(len(held), 'action')} held for approval, {_count(len(review_items), 'item')} to check."
+        elif review["decision"] == "reject":
+            text += f"Rejected by {review['actor'].removeprefix('reviewer:')}."
+        else:
+            text += (
+                f"Reviewed by {review['actor'].removeprefix('reviewer:')}: "
+                f"{len(review['approved'])} of {_count(len(held), 'held action')} applied."
+            )
         return {
             **meta,
             "rows": final_rows,
