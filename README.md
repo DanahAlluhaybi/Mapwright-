@@ -53,6 +53,17 @@ schema, tick the held changes you approve, and download the clean file.
 Close the black window to stop it. On macOS or Linux, run
 `python -m mapwright serve --open`.
 
+To check a result yourself, clean one of the benchmark files on the page
+(for example `benchmark/datasets/D05/source.csv`), download the result and
+compare it with the known right answer:
+
+```
+python -m evaluation.check path/to/source-clean.csv D05
+```
+
+It matches rows on the key, says how many cells are identical, and lists
+any differences.
+
 ![The review page](docs/review-page.png)
 
 ## Getting started
