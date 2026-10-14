@@ -66,6 +66,7 @@ def main(argv: list[str] | None = None) -> int:
         help="rules only (default), rules then the model for what they leave (hybrid), or the model only (llm)",
     )
     run_cmd.add_argument("--model", help="model for hybrid/llm; defaults to $MAPWRIGHT_MODEL or gemini-3.8-flash")
+    run_cmd.add_argument("--sheet", help="Excel sources: the sheet to read (default: the first)")
 
     replay_cmd = commands.add_parser("replay", help="apply a saved plan to a source file")
     replay_cmd.add_argument("plan", type=Path)
@@ -119,7 +120,20 @@ def main(argv: list[str] | None = None) -> int:
                 print(error)
                 return 1
         try:
-            outcome = run(args.source, contract, dict(args.reference), system=args.system, session=session)
+            source = args.source
+            from .excel import ExcelError, excel_to_csv, is_excel
+
+            if is_excel(source.name):
+                try:
+                    data, sheet = excel_to_csv(source.read_bytes(), args.sheet)
+                except ExcelError as error:
+                    print(error)
+                    return 2
+                args.out.mkdir(parents=True, exist_ok=True)
+                source = args.out / "source.csv"
+                source.write_bytes(data)
+                print(f"Read sheet {sheet!r}; saved as {source} (use this file for replay)")
+            outcome = run(source, contract, dict(args.reference), system=args.system, session=session)
         except Exception as error:
             if type(error).__name__ not in ("LLMError", "CacheMiss"):
                 raise

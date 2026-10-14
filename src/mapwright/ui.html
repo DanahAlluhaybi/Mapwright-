@@ -53,12 +53,16 @@
 <body>
 <main>
   <h1>Mapwright</h1>
-  <p class="sub">Upload a CSV export, check what was held back, approve, download the clean file.</p>
+  <p class="sub">Upload a CSV or Excel export, check what was held back, approve, download the clean file.</p>
 
   <section class="card" id="upload">
     <h2>1. Upload</h2>
-    <label for="file">CSV file</label>
-    <input type="file" id="file" accept=".csv,text/csv">
+    <label for="file">CSV or Excel file</label>
+    <input type="file" id="file" accept=".csv,text/csv,.xlsx,.xlsm">
+    <div id="sheetBox" class="hidden">
+      <label for="sheet">Sheet</label>
+      <input type="text" id="sheet" placeholder="Leave empty for the first sheet">
+    </div>
     <div class="row">
       <div>
         <label for="contract">Target schema</label>
@@ -72,6 +76,22 @@
           <option value="llm">AI only</option>
         </select>
       </div>
+    </div>
+    <p class="hint" style="margin-top:8px"><a href="#" id="editRules">Change the rules for this schema</a></p>
+    <div id="rulesBox" class="hidden">
+      <p class="hint">Tick what each column must satisfy. <b>Unique</b> means no two rows may share a value;
+        leave it off for columns where repeats are normal. <b>Allowed values</b> lists the only values accepted,
+        separated by commas; leave it empty for any value. Saving makes a new schema; the built-in ones stay as they are.</p>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Column</th><th>Type</th><th>Required</th><th>Unique</th><th>Allowed values</th></tr></thead>
+          <tbody id="rules"></tbody>
+        </table>
+      </div>
+      <label for="ruleName">Save as</label>
+      <input type="text" id="ruleName" placeholder="for example customer-my-company">
+      <button id="saveRules">Save these rules</button>
+      <div id="rulesStatus"></div>
     </div>
     <button class="primary" id="run">Clean the file</button>
     <div id="runStatus"></div>
@@ -180,25 +200,104 @@
   function showDone(run) {
     $("result").textContent = run.summary_text;
     $("download").href = "/runs/" + run.id + "/target.csv";
-    $("download").download = run.filename.replace(/\.csv$/i, "") + "-clean.csv";
+    $("download").download = run.filename.replace(/\.(csv|xlsx|xlsm)$/i, "") + "-clean.csv";
     $("auditLink").href = "/runs/" + run.id + "/audit";
     $("download").parentElement.classList.toggle("hidden", run.status === "rejected");
     $("done").classList.remove("hidden");
     $("done").scrollIntoView({ behavior: "smooth" });
   }
 
-  async function loadContracts() {
+  async function loadContracts(select) {
     try {
       const data = await api("/contracts");
+      $("contract").replaceChildren();
       for (const name of data.contracts) {
         const option = document.createElement("option");
         option.value = option.textContent = name;
         $("contract").appendChild(option);
       }
+      if (select) $("contract").value = select;
     } catch (error) {
       status($("runStatus"), "bad", error.message);
     }
   }
+
+  let rulesFor = null;
+  async function showRules() {
+    const name = $("contract").value;
+    try {
+      const detail = await api("/contracts/" + encodeURIComponent(name));
+      rulesFor = detail;
+      const body = $("rules");
+      body.replaceChildren();
+      for (const f of detail.fields) {
+        const tr = document.createElement("tr");
+        tr.dataset.field = f.name;
+        const label = cell(tr, f.name);
+        if (detail.primary_key.includes(f.name)) label.textContent += " (key)";
+        if (f.description) label.title = f.description;
+        cell(tr, f.type);
+        for (const flag of ["required", "unique"]) {
+          const box = document.createElement("input");
+          box.type = "checkbox";
+          box.dataset.rule = flag;
+          box.checked = f[flag];
+          box.disabled = detail.primary_key.includes(f.name);
+          cell(tr, "").appendChild(box);
+        }
+        const values = document.createElement("input");
+        values.type = "text";
+        values.dataset.rule = "allowed_values";
+        values.value = (f.allowed_values || []).join(", ");
+        values.placeholder = "any value";
+        cell(tr, "").appendChild(values);
+        body.appendChild(tr);
+      }
+      $("ruleName").value = detail.builtin ? name + "-custom" : name;
+      status($("rulesStatus"), "", "");
+      $("rulesBox").classList.remove("hidden");
+    } catch (error) {
+      status($("runStatus"), "bad", error.message);
+    }
+  }
+
+  $("editRules").addEventListener("click", (event) => {
+    event.preventDefault();
+    if ($("rulesBox").classList.contains("hidden")) showRules();
+    else $("rulesBox").classList.add("hidden");
+  });
+  $("contract").addEventListener("change", () => {
+    if (!$("rulesBox").classList.contains("hidden")) showRules();
+  });
+  $("saveRules").addEventListener("click", async () => {
+    const fields = {};
+    for (const tr of $("rules").children) {
+      const rules = {};
+      for (const input of tr.querySelectorAll("[data-rule]")) {
+        rules[input.dataset.rule] = input.type === "checkbox" ? input.checked : input.value;
+      }
+      fields[tr.dataset.field] = rules;
+    }
+    $("saveRules").disabled = true;
+    try {
+      const saved = await api("/contracts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: $("ruleName").value.trim(), base: rulesFor.name, fields }),
+      });
+      await loadContracts(saved.name);
+      status($("rulesStatus"), "ok", "Saved as " + saved.name + ". It is now the selected schema.");
+    } catch (error) {
+      status($("rulesStatus"), "bad", error.message);
+    } finally {
+      $("saveRules").disabled = false;
+    }
+  });
+
+  $("file").addEventListener("change", () => {
+    const file = $("file").files[0];
+    $("sheetBox").classList.toggle("hidden", !(file && /\.xls[xm]$/i.test(file.name)));
+  });
 
   $("run").addEventListener("click", async () => {
     const file = $("file").files[0];
@@ -209,6 +308,7 @@
     status($("runStatus"), "warn", "Working on it. Rules only takes seconds; with AI it can take a minute.");
     try {
       const query = new URLSearchParams({ contract: $("contract").value, system: $("system").value, filename: file.name });
+      if (/\.xls[xm]$/i.test(file.name) && $("sheet").value.trim()) query.set("sheet", $("sheet").value.trim());
       const run = await api("/runs?" + query, { method: "POST", headers: { "Content-Type": "text/csv" }, body: file });
       status($("runStatus"), "ok", "Done: " + run.rows + " rows.");
       showReview(run);
@@ -242,6 +342,7 @@
   $("reject").addEventListener("click", () => review("reject"));
   $("again").addEventListener("click", () => {
     $("file").value = "";
+    $("sheetBox").classList.add("hidden");
     $("note").value = "";
     for (const id of ["review", "done"]) $(id).classList.add("hidden");
     status($("runStatus"), "", "");

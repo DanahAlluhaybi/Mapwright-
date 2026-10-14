@@ -9,3 +9,4 @@ results/
 .pytest_cache/
 benchmark/raw/
 private/
+contracts/custom/

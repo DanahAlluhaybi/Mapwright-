@@ -53,6 +53,13 @@ schema, tick the held changes you approve, and download the clean file.
 Close the black window to stop it. On macOS or Linux, run
 `python -m mapwright serve --open`.
 
+Excel files (`.xlsx`) work too, one sheet at a time; they need
+`pip install openpyxl` once. **Change the rules for this schema** on the
+page shows every column of the target schema: tick whether it is required
+or must be unique, and list the values it may take. Saving makes a new
+schema under `contracts/custom/` (ignored by git); the built-in ones never
+change.
+
 To check a result yourself, clean one of the benchmark files on the page
 (for example `benchmark/datasets/D05/source.csv`), download the result and
 compare it with the known right answer:

@@ -6,8 +6,11 @@ start a run, show it to a person and send back their decision.
     GET  /                          a page to upload, review and download, for people
     GET  /health                    is the server up
     GET  /contracts                 contract names that can be used
-    POST /runs?contract=customer&system=rules&filename=export.csv
-                                    body: the raw CSV file
+    GET  /contracts/<name>          a schema's fields and rules
+    POST /contracts                 JSON {"name", "base", "fields": {field: {"required", "unique",
+                                    "allowed_values"}}}: save a copy with changed rules
+    POST /runs?contract=customer&system=rules&filename=export.csv[&sheet=Sheet1]
+                                    body: the raw CSV or Excel (.xlsx) file
     POST /runs                      JSON {"source_path", "contract", "system"}: a file on this machine
     GET  /runs                      recent runs
     GET  /runs/<id>                 summary: rows, held actions, items needing review
@@ -38,7 +41,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+import yaml
+
 from .contracts import load_contract
+from .excel import ExcelError, excel_to_csv, is_excel
 from .output import write_run, write_target
 from .pipeline import replay, run
 
@@ -73,6 +79,7 @@ def _table_hash(rows: list[dict[str, str]], numbers: list[int]) -> str:
 class Settings:
     runs_dir: Path = Path("runs/api")
     contracts_dir: Path = Path("contracts")
+    custom_dir: Path = Path("contracts/custom")  # rules saved from the page
     data_root: Path = Path(".")
     cache_dir: Path = Path("llm_cache")
     references: dict[str, frozenset[str]] = field(default_factory=dict)
@@ -109,13 +116,106 @@ class Service:
     def contract_path(self, name: str) -> Path:
         if not NAME.match(name or ""):
             raise ApiError(HTTPStatus.BAD_REQUEST, "contract must be a name such as 'customer'")
-        path = self.settings.contracts_dir / f"{name}.yaml"
-        if not path.is_file():
-            raise ApiError(HTTPStatus.BAD_REQUEST, f"unknown contract {name!r}; known: {', '.join(self.contracts())}")
-        return path
+        for directory in (self.settings.contracts_dir, self.settings.custom_dir):
+            path = directory / f"{name}.yaml"
+            if path.is_file():
+                return path
+        raise ApiError(HTTPStatus.BAD_REQUEST, f"unknown contract {name!r}; known: {', '.join(self.contracts())}")
+
+    def builtin_contracts(self) -> list[str]:
+        return sorted(p.stem for p in self.settings.contracts_dir.glob("*.yaml"))
 
     def contracts(self) -> list[str]:
-        return sorted(p.stem for p in self.settings.contracts_dir.glob("*.yaml"))
+        custom = sorted(p.stem for p in self.settings.custom_dir.glob("*.yaml")) if self.settings.custom_dir.is_dir() else []
+        return self.builtin_contracts() + [c for c in custom if c not in self.builtin_contracts()]
+
+    # Rules -----------------------------------------------------------------
+
+    def contract_detail(self, name: str) -> dict:
+        path = self.contract_path(name)
+        raw = yaml.safe_load(path.read_text("utf-8"))
+        return {
+            "name": name,
+            "builtin": path.parent == self.settings.contracts_dir,
+            "based_on": raw.get("based_on"),
+            "entity": raw["entity"],
+            "primary_key": raw["primary_key"],
+            "fields": [
+                {
+                    "name": f["name"],
+                    "type": f["type"],
+                    "required": bool(f.get("required", False)),
+                    "unique": bool(f.get("unique", False)),
+                    "allowed_values": [str(v) for v in f["allowed_values"]] if f.get("allowed_values") else None,
+                    "pattern": f.get("pattern"),
+                    "min": f.get("min"),
+                    "max": f.get("max"),
+                    "description": " ".join(str(f["canonical"]).split()) if f.get("canonical") else None,
+                }
+                for f in raw["fields"]
+            ],
+        }
+
+    def save_contract(self, body: dict) -> dict:
+        """Save a copy of a contract with changed rules under a new name.
+
+        Only ``required``, ``unique`` and ``allowed_values`` can change, and
+        the primary key stays required and unique, so a saved contract is
+        always one the pipeline can run.
+        """
+        name = str(body.get("name") or "").strip()
+        if not NAME.match(name):
+            raise ApiError(HTTPStatus.BAD_REQUEST, "name may use letters, digits, '-' and '_' only")
+        if name in self.builtin_contracts():
+            raise ApiError(HTTPStatus.BAD_REQUEST, f"{name!r} is a built-in schema; save under another name")
+        base_path = self.contract_path(str(body.get("base") or ""))
+        raw = yaml.safe_load(base_path.read_text("utf-8"))
+        changes = body.get("fields") or {}
+        if not isinstance(changes, dict):
+            raise ApiError(HTTPStatus.BAD_REQUEST, "fields must map field names to their rules")
+        specs = {f["name"]: f for f in raw["fields"]}
+        unknown = sorted(set(changes) - set(specs))
+        if unknown:
+            raise ApiError(HTTPStatus.BAD_REQUEST, f"no such fields: {', '.join(unknown)}")
+        for field_name, rules in changes.items():
+            spec = specs[field_name]
+            if not isinstance(rules, dict):
+                raise ApiError(HTTPStatus.BAD_REQUEST, f"rules for {field_name} must be an object")
+            for flag in ("required", "unique"):
+                if flag in rules:
+                    if field_name in raw["primary_key"] and not rules[flag]:
+                        raise ApiError(HTTPStatus.BAD_REQUEST, f"{field_name} is the key, so it stays {flag}")
+                    spec[flag] = bool(rules[flag])
+            if "allowed_values" in rules:
+                values = rules["allowed_values"]
+                if isinstance(values, str):
+                    values = [v.strip() for v in values.split(",")]
+                values = [str(v).strip() for v in values or [] if str(v).strip()]
+                if values:
+                    spec["allowed_values"] = values
+                else:
+                    spec.pop("allowed_values", None)
+        # A contract finds its reference files relative to the folder above its own;
+        # rewrite those paths so they still work from where the copy is saved.
+        base_root = base_path.parent.parent
+        new_root = self.settings.custom_dir.parent
+        for spec in raw["fields"]:
+            if spec.get("reference"):
+                target = (base_root / spec["reference"]).resolve()
+                spec["reference"] = Path(os.path.relpath(target, new_root.resolve())).as_posix()
+        raw["based_on"] = raw.get("based_on") or base_path.stem
+        raw["description"] = str(body.get("description") or raw.get("description") or "").strip()
+
+        self.settings.custom_dir.mkdir(parents=True, exist_ok=True)
+        path = self.settings.custom_dir / f"{name}.yaml"
+        header = f"# Saved from the Mapwright page on {_now()}, based on {raw['based_on']}.\n"
+        path.write_text(header + yaml.safe_dump(raw, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        try:
+            load_contract(path)
+        except Exception as error:
+            path.unlink()
+            raise ApiError(HTTPStatus.BAD_REQUEST, f"those rules do not make a valid schema: {error}") from error
+        return self.contract_detail(name)
 
     def local_source(self, source_path: str) -> Path:
         root = self.settings.data_root.resolve()
@@ -128,11 +228,20 @@ class Service:
 
     # Runs ------------------------------------------------------------------
 
-    def start(self, data: bytes, contract_name: str, system: str = "rules", filename: str = "source.csv") -> dict:
+    def start(
+        self, data: bytes, contract_name: str, system: str = "rules", filename: str = "source.csv", sheet: str | None = None
+    ) -> dict:
         if system not in SYSTEMS:
             raise ApiError(HTTPStatus.BAD_REQUEST, f"system must be one of {', '.join(SYSTEMS)}")
         if not data:
             raise ApiError(HTTPStatus.BAD_REQUEST, "the request has no file")
+        if is_excel(filename):
+            try:
+                data, sheet = excel_to_csv(data, sheet or None)
+            except ExcelError as error:
+                raise ApiError(HTTPStatus.BAD_REQUEST, str(error)) from error
+        else:
+            sheet = None
         contract_path = self.contract_path(contract_name)
         contract = load_contract(contract_path)
 
@@ -163,6 +272,7 @@ class Service:
             "id": run_id,
             "created": _now(),
             "filename": Path(filename).name or "source.csv",
+            "sheet": sheet,
             "contract": contract_name,
             "system": system,
             "status": "awaiting_review",
@@ -392,8 +502,12 @@ def make_handler(service: Service):
         def _route(self, method: str, parts: list[str], query: dict) -> None:
             if method == "GET" and parts == ["health"]:
                 return self._json(HTTPStatus.OK, {"ok": True})
-            if method == "GET" and parts == ["contracts"]:
-                return self._json(HTTPStatus.OK, {"contracts": service.contracts()})
+            if parts == ["contracts"]:
+                if method == "GET":
+                    return self._json(HTTPStatus.OK, {"contracts": service.contracts()})
+                return self._json(HTTPStatus.CREATED, service.save_contract(self._json_body()))
+            if method == "GET" and len(parts) == 2 and parts[0] == "contracts":
+                return self._json(HTTPStatus.OK, service.contract_detail(parts[1]))
             if parts == ["runs"]:
                 if method == "GET":
                     return self._json(HTTPStatus.OK, {"runs": service.list_runs()})
@@ -409,6 +523,7 @@ def make_handler(service: Service):
                         query.get("contract", ""),
                         query.get("system", "rules"),
                         query.get("filename", "source.csv"),
+                        query.get("sheet") or None,
                     )
                 return self._json(HTTPStatus.CREATED, summary)
             if len(parts) == 2 and parts[0] == "runs" and method == "GET":

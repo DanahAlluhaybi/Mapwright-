@@ -1,3 +1,5 @@
+import csv
+import importlib.util
 import json
 import os
 import tempfile
@@ -53,6 +55,7 @@ class ServerTest(unittest.TestCase):
         self.settings = Settings(
             runs_dir=Path(self.tmp.name) / "runs",
             contracts_dir=ROOT / "contracts",
+            custom_dir=Path(self.tmp.name) / "custom",
             data_root=ROOT,
             token=self.token,
         )
@@ -204,6 +207,96 @@ class ModelRunTest(ServerTest):
         self.assertEqual(status, 400)
         self.assertIn("GEMINI_API_KEY", error["error"])
         self.assertEqual(self.client.json("GET", "/runs")[1]["runs"], [])
+
+
+def workbook_bytes(path: Path, sheets: dict[str, Path]) -> bytes:
+    import io
+
+    import openpyxl
+
+    book = openpyxl.Workbook()
+    book.remove(book.active)
+    for name, csv_path in sheets.items():
+        sheet = book.create_sheet(name)
+        for row in csv.reader(csv_path.open(encoding="utf-8", newline="")):
+            sheet.append(row)
+    out = io.BytesIO()
+    book.save(out)
+    return out.getvalue()
+
+
+@unittest.skipUnless(importlib.util.find_spec("openpyxl"), "openpyxl not installed")
+class ExcelUploadTest(ServerTest):
+    def test_excel_upload_matches_the_csv_run(self):
+        data = workbook_bytes(Path(self.tmp.name), {"Notes": EXAMPLE, "Customers": D05})
+        status, from_csv = self.client.upload(D05, "contract=customer")
+        status, run = self.client.call("POST", "/runs?contract=customer&filename=book.xlsx&sheet=Customers", data, "application/octet-stream")[:2]
+        run = json.loads(run)
+        self.assertEqual(status, 201, run)
+        self.assertEqual(run["sheet"], "Customers")
+        self.assertEqual(run["rows"], from_csv["rows"])
+        self.assertEqual(run["held_ids"], from_csv["held_ids"])
+
+    def test_unknown_sheet_lists_the_sheets(self):
+        data = workbook_bytes(Path(self.tmp.name), {"Customers": D05})
+        status, raw, _ = self.client.call("POST", "/runs?contract=customer&filename=book.xlsx&sheet=Nope", data)
+        self.assertEqual(status, 400)
+        self.assertIn("Customers", json.loads(raw)["error"])
+
+    def test_a_file_that_is_not_a_workbook(self):
+        status, raw, _ = self.client.call("POST", "/runs?contract=customer&filename=book.xlsx", b"not excel")
+        self.assertEqual(status, 400)
+
+
+class RulesTest(ServerTest):
+    def test_read_rules(self):
+        status, detail = self.client.json("GET", "/contracts/customer")
+        self.assertEqual(status, 200)
+        self.assertTrue(detail["builtin"])
+        email = next(f for f in detail["fields"] if f["name"] == "email")
+        self.assertFalse(email["unique"])
+
+    def test_save_and_use_custom_rules(self):
+        status, saved = self.client.json(
+            "POST",
+            "/contracts",
+            {
+                "name": "customer-strict",
+                "base": "customer",
+                "fields": {
+                    "email": {"unique": True, "required": True},
+                    "customer_type": {"allowed_values": "INDIVIDUAL, BUSINESS, GOVERNMENT"},
+                },
+            },
+        )
+        self.assertEqual(status, 201, saved)
+        fields = {f["name"]: f for f in saved["fields"]}
+        self.assertTrue(fields["email"]["unique"])
+        self.assertEqual(fields["customer_type"]["allowed_values"], ["INDIVIDUAL", "BUSINESS", "GOVERNMENT"])
+        self.assertFalse(saved["builtin"])
+        self.assertIn("customer-strict", self.client.json("GET", "/contracts")[1]["contracts"])
+
+        # the reference list for city still loads from the saved copy
+        status, run = self.client.upload(D05, "contract=customer-strict")
+        self.assertEqual(status, 201, run)
+        # review works against a custom schema too
+        status, done = self.client.json(
+            "POST", f"/runs/{run['id']}/review", {"decision": "approve", "approve": "all", "reviewer": "S"}
+        )
+        self.assertEqual(status, 200, done)
+
+    def test_rules_that_are_refused(self):
+        cases = [
+            {"name": "customer", "base": "customer", "fields": {}},
+            {"name": "bad name!", "base": "customer", "fields": {}},
+            {"name": "x", "base": "nope", "fields": {}},
+            {"name": "x", "base": "customer", "fields": {"no_such_column": {"unique": True}}},
+            {"name": "x", "base": "customer", "fields": {"customer_id": {"unique": False}}},
+        ]
+        for body in cases:
+            status, error = self.client.json("POST", "/contracts", body)
+            self.assertEqual(status, 400, body)
+            self.assertIn("error", error)
 
 
 class TokenTest(ServerTest):
