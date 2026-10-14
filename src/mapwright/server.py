@@ -51,6 +51,7 @@ from .pipeline import replay, run
 
 MAX_UPLOAD = 50 * 1024 * 1024
 UI_PAGE = Path(__file__).with_name("ui.html")
+AGENT_PAGE = Path(__file__).with_name("ui_agent.html")
 RUN_ID = re.compile(r"^[0-9]{8}-[0-9]{6}-[0-9a-f]{6}$")
 NAME = re.compile(r"^[A-Za-z0-9_-]+$")
 SYSTEMS = ("rules", "hybrid", "llm")
@@ -464,6 +465,22 @@ class Service:
 
 
 def make_handler(service: Service):
+    from .agent.api import AgentAPI
+
+    def read_source(source_path: str) -> tuple[bytes, str]:
+        try:
+            path = service.local_source(source_path)
+        except ApiError as error:
+            raise ValueError(error.message) from error
+        return path.read_bytes(), path.name
+
+    def provider_for(model: str):
+        from .llm import CachedProvider, make_provider
+
+        return CachedProvider(service.settings.cache_dir, make_provider(model))
+
+    agent = AgentAPI(service.settings, read_source, provider_for)
+    service.agent = agent
     class Handler(BaseHTTPRequestHandler):
         server_version = "Mapwright"
 
@@ -471,9 +488,11 @@ def make_handler(service: Service):
             if os.environ.get("MAPWRIGHT_API_QUIET") != "1":
                 super().log_message(format, *args)
 
-        def _send(self, status: int, body: bytes, content_type: str) -> None:
+        def _send(self, status: int, body: bytes, content_type: str, headers: dict | None = None) -> None:
             self.send_response(status)
             self.send_header("Content-Type", content_type)
+            for name, value in (headers or {}).items():
+                self.send_header(name, value)
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
@@ -497,22 +516,27 @@ def make_handler(service: Service):
                 raise ApiError(HTTPStatus.BAD_REQUEST, "body must be a JSON object")
             return data
 
-        def _authorized(self) -> bool:
+        def _authorized(self, query_token: str | None = None) -> bool:
             token = service.settings.token
             if not token:
                 return True
+            if query_token and secrets.compare_digest(query_token, token):
+                return True  # report and dashboard links opened in a new tab
             return secrets.compare_digest(self.headers.get("Authorization", ""), f"Bearer {token}")
 
         def _handle(self, method: str) -> None:
             try:
                 url = urlparse(self.path)
                 parts = [p for p in url.path.split("/") if p]
-                if method == "GET" and not parts:
-                    # The page holds no data; every call it makes still needs the token.
-                    return self._send(HTTPStatus.OK, UI_PAGE.read_bytes(), "text/html; charset=utf-8")
-                if not self._authorized():
-                    raise ApiError(HTTPStatus.UNAUTHORIZED, "missing or wrong API token")
                 query = {k: v[-1] for k, v in parse_qs(url.query).items()}
+                if method == "GET" and (not parts or parts == ["agent"]):
+                    # The pages hold no data; every call they make still needs the token.
+                    page = UI_PAGE if not parts else AGENT_PAGE
+                    return self._send(HTTPStatus.OK, page.read_bytes(), "text/html; charset=utf-8")
+                if not self._authorized(query.get("token")):
+                    raise ApiError(HTTPStatus.UNAUTHORIZED, "missing or wrong API token")
+                if agent.route(self, method, parts, query):
+                    return
                 self._route(method, parts, query)
             except ApiError as error:
                 self._json(error.status, {"error": error.message})

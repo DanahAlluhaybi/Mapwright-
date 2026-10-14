@@ -95,6 +95,40 @@ Errors come back as `{"error": "..."}` with status 400 (bad input), 404,
 409 (already reviewed), 422 (file could not be processed) or 502 (the
 model call failed).
 
+## Background jobs and the daily check
+
+Long or scheduled work goes through jobs, which n8n starts and then polls:
+
+| Request | Does |
+| --- | --- |
+| `POST /jobs` `{"kind": "check", "source_path": "private/customers.csv", "threshold": 0.95, "idempotency_key": "check-2026-10-14"}` | profile a file and report its quality |
+| `POST /jobs` `{"kind": "apply_plan", "source_path": "private/october.csv", "session": "s-..."}` | repeat a session's approved steps on a new file |
+| `GET /jobs/<id>` | `queued`, `running`, `done` (with `result`) or `failed` (with `error`) |
+
+- `source_path` must be inside the folder the server was started from.
+- The same `idempotency_key` returns the first job instead of starting a
+  second one, so a repeated trigger does no double work. A failed job can
+  be retried with the same key.
+- `apply_plan` keeps all steps or none: if a step no longer fits the new
+  file, the job fails and names the step.
+- A job that runs past the time limit (10 minutes), or was running when
+  the server stopped, is reported as failed.
+- A `check` result has `quality_score`, finding counts, the top findings,
+  `below_threshold` when a threshold was given, a one-line `summary_text`,
+  and links to the report and the cleaned CSV.
+
+`n8n/mapwright-daily-check.json` is a second workflow built on this:
+
+```
+Every morning → Start check → Wait 10 s → Get status → Finished? ─no→ Wait
+                                                        └yes→ Needs attention? → Message → Notify
+```
+
+Import it like the first one, change `source_path` in **Start check** to
+your file, and replace **Notify** with an email, Telegram or Slack node.
+The message holds the summary and the report link; it never includes rows
+from the file.
+
 ## Token
 
 The API listens on `127.0.0.1` only, so nothing outside your machine can

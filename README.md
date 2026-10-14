@@ -42,8 +42,20 @@ on them.
 | Pipeline: ingest, profile, mapping, typed actions, validation, approval policy, audit log | `src/mapwright/` |
 | Model layer: Gemini provider, response cache, mapping and value prompts, repair loop | `src/mapwright/llm/`, `src/mapwright/llmplan.py` |
 | Recorded model answers, so every run replays without a key | `llm_cache/` |
-| Local API and n8n review workflow | `src/mapwright/server.py`, `n8n/` |
+| Local API and n8n workflows (review; daily quality check) | `src/mapwright/server.py`, `n8n/` |
+| Agent for any file: profiling, requests, approval, analysis, reports | `src/mapwright/agent/`, `ui_agent.html` |
 | Design documents | `docs/` |
+
+## The agent: any file, in plain language
+
+`/agent` on the same local server opens a page for files with no schema
+chosen in advance. It profiles every column and shows the evidence for its
+type, explains the data-quality findings, turns requests such as "convert
+this column to yes/no" or "top 5 cities by sales" into steps you preview
+and approve, computes every number in code, and builds a report and a
+filterable dashboard. The model (optional; Gemini or a free local one)
+only chooses from a fixed list of operations and queries, and sees column
+summaries, never the file. See [docs/AGENT.md](docs/AGENT.md).
 
 ## The quickest way to use it
 
@@ -251,4 +263,6 @@ precise effect sizes. A second model is the next thing to add.
 - [Architecture](docs/ARCHITECTURE.md): pipeline, what is code and what is LLM, actions, validation, approval policy
 - [Benchmark](docs/BENCHMARK.md): target schema, the 12 cases, ground truth format, held-out rules
 - [Evaluation](docs/EVALUATION.md): systems compared, hypotheses, metrics, protocol
-- [n8n](docs/N8N.md): local API and the review workflow
+- [Agent](docs/AGENT.md): any file, requests in plain language, analysis, reports
+- [Agent plan](docs/AGENT_PLAN.md): how the agent was added to the existing engine
+- [n8n](docs/N8N.md): local API, the review workflow, background jobs and the daily check

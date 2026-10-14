@@ -1,8 +1,8 @@
 # Interactive data agent: current state and plan
 
-Phase 1 of the brief in the conversation of 2026-10-14: what Mapwright
-already does, what the interactive agent needs, and the order to build it
-in. No code was changed for this document.
+Phase 1 of the brief of 2026-10-14: what Mapwright already did, what the
+interactive agent needed, and the order to build it in. Sections 1–7 are
+the plan as written before any code; section 8 records what was built.
 
 ## 1. What exists today
 
@@ -167,3 +167,44 @@ tests. The phase numbers follow the brief.
 Phase 2, column type and role inference plus the Explore view. It is
 deterministic, needs no model, closes the main gap, and every later phase
 builds on it.
+
+## 8. Status: built
+
+All phases were built on 2026-10-14 in `src/mapwright/agent/`, with
+`ui_agent.html`, two n8n workflows and 25 new tests (188 in all, passing).
+The existing engine, benchmark and results are unchanged.
+
+| Module | Phase | Does |
+| --- | --- | --- |
+| `table.py` | 2 | CSV or Excel sheet as a plain table with original row numbers |
+| `infer.py` | 2 | type, role, statistics and evidence per column; guesses labelled |
+| `ops.py` | 3 | the operation vocabulary: check, preview (counts, before/after, unconverted values, risk), apply, replay |
+| `nl.py` | 3 | requests to operations or queries: built-in English/Arabic rules, or a model whose answer is validated the same way |
+| `quality.py` | 4 | findings with severity (error, anomaly, recommendation) and fixes to preview |
+| `analysis.py` | 5 | group, share, trend, forecast (tested on held-back periods), relation, outliers, missing, with filters |
+| `charts.py`, `report.py` | 6 | SVG charts from computed numbers; report and filterable dashboard |
+| `session.py` | 3–6 | upload kept unchanged, approved plan, history, undo, validation after each step |
+| `jobs.py`, `api.py` | 7 | HTTP routes; background jobs with status, idempotency keys, time limit, all-or-nothing plan replay |
+
+Acceptance criteria from the brief:
+
+| # | Criterion | Where |
+| --- | --- | --- |
+| 1 | Upload a real dataset | `/agent`, CSV or Excel with sheet choice |
+| 2 | Understand columns and quality profile | column list, column panel with evidence, findings |
+| 3 | Select a column and describe a change | tick columns, type a request |
+| 4 | Clarification when needed | yes/no meaning, day/month order, how to fill, which column |
+| 5 | Review and approve a plan | proposal cards with counts, examples, risk |
+| 6 | Original file unchanged | `original.csv` is never written after upload; tested |
+| 7 | Inspect results and validation | validation message after each step, column panel, downloads |
+| 8 | Analytical questions | analysis queries from requests |
+| 9 | Report or dashboard | `/sessions/<id>/report`, `/sessions/<id>/dashboard` |
+| 10 | Workflow through n8n | `mapwright-review.json`, `mapwright-daily-check.json`, jobs |
+| 11 | Workflow status and failures | `GET /jobs/<id>`; failures name the cause and the step |
+| 12 | Reproduce approved steps, review changes | plan download, `apply_plan` job, history, undo |
+
+Not done, and why: the daily-check n8n workflow has not been run inside
+n8n yet (the review workflow has); the model path of `nl.py` is tested
+with scripted answers, not yet with a real model; there is no
+multi-user isolation beyond one folder per session, which fits a local,
+single-user tool.

@@ -1,0 +1,280 @@
+{
+  "name": "Mapwright: daily data-quality check",
+  "nodes": [
+    {
+      "id": "e3bed81e-e457-4d70-9302-b5f8c33bb08d",
+      "name": "Every morning",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "d050cab0-604b-411d-a0e8-695db31a7d40",
+      "name": "Start check",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8765/jobs",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ kind: 'check', source_path: 'private/customers.csv', threshold: 0.95, idempotency_key: 'check-' + $now.toFormat('yyyy-MM-dd') }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "beb56538-b2cc-4166-ab21-c9040905eb14",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        0
+      ],
+      "webhookId": "283b8e2a-46ae-44b9-bd4d-72581556de54",
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      }
+    },
+    {
+      "id": "76d1c172-1d24-4779-80e6-8d36d58d2de6",
+      "name": "Get status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "url": "={{ 'http://127.0.0.1:8765/jobs/' + $('Start check').item.json.id }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "a91b9e95-5d44-4521-a639-23dff0888886",
+      "name": "Finished?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "5cb5a9d5-3bef-4186-918f-7d31fe604514",
+              "leftValue": "={{ ['done', 'failed'].includes($json.status) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "00ad1f91-ac77-4674-9884-0c9f80255e5d",
+      "name": "Needs attention?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        -100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "583dbf6c-d1e4-4929-914b-13892d1c9ca4",
+              "leftValue": "={{ $json.status === 'failed' || $json.result.below_threshold === true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "1a771fd4-520d-45fe-a5f3-fe777ba2cb39",
+      "name": "Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1320,
+        -200
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "747c87bb-5f36-4dae-9da7-d5c1066c0922",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.status === 'failed' ? 'Mapwright check failed: ' + $json.error : 'Data quality dropped: ' + $json.result.summary_text + ' Report: http://127.0.0.1:8765' + $json.result.report }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "38081f0e-d034-42bc-9b98-5ef75cd5a5df",
+      "name": "Notify (connect email or Telegram here)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        -200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "83bd793a-6416-4478-8666-d3a73daabafc",
+      "name": "All good",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        0
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Every morning": {
+      "main": [
+        [
+          {
+            "node": "Start check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start check": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get status": {
+      "main": [
+        [
+          {
+            "node": "Finished?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finished?": {
+      "main": [
+        [
+          {
+            "node": "Needs attention?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs attention?": {
+      "main": [
+        [
+          {
+            "node": "Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "All good",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message": {
+      "main": [
+        [
+          {
+            "node": "Notify (connect email or Telegram here)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
