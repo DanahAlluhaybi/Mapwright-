@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapwright</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --card: #ffffff; --text: #1d1d1b; --muted: #6b6b66; --line: #e3e3de;
+    --accent: #2f5bea; --accent-text: #ffffff; --warn: #a15c00; --warn-bg: #fff4e0;
+    --ok: #1d7a3e; --ok-bg: #e7f6ec; --bad: #b42318; --bad-bg: #fdecea;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161615; --card: #1f1f1d; --text: #ececea; --muted: #a3a39d; --line: #33332f;
+      --accent: #7c9bff; --accent-text: #0e0e0d; --warn: #ffb547; --warn-bg: #332611;
+      --ok: #6fd193; --ok-bg: #12291a; --bad: #ff8a80; --bad-bg: #3a1714;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+          padding: 20px; margin-bottom: 16px; }
+  h2 { font-size: 16px; margin: 0 0 12px; }
+  label { display: block; font-weight: 600; margin: 12px 0 4px; }
+  input[type=text], select, textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--line);
+          border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }
+  input[type=file] { font: inherit; }
+  textarea { min-height: 60px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 520px) { .row { grid-template-columns: 1fr; } }
+  button { font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 6px; border: 1px solid var(--line);
+           background: var(--card); color: var(--text); cursor: pointer; margin: 16px 8px 0 0; }
+  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  button:disabled { opacity: .5; cursor: wait; }
+  .hint { color: var(--muted); font-size: 13px; }
+  .status { padding: 10px 12px; border-radius: 6px; margin: 12px 0 0; }
+  .status.warn { background: var(--warn-bg); color: var(--warn); }
+  .status.ok { background: var(--ok-bg); color: var(--ok); }
+  .status.bad { background: var(--bad-bg); color: var(--bad); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  ul { margin: 6px 0 0; padding-left: 20px; }
+  a { color: var(--accent); }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Mapwright</h1>
+  <p class="sub">Upload a CSV export, check what was held back, approve, download the clean file.</p>
+
+  <section class="card" id="upload">
+    <h2>1. Upload</h2>
+    <label for="file">CSV file</label>
+    <input type="file" id="file" accept=".csv,text/csv">
+    <div class="row">
+      <div>
+        <label for="contract">Target schema</label>
+        <select id="contract"></select>
+      </div>
+      <div>
+        <label for="system">System</label>
+        <select id="system">
+          <option value="rules">Rules only (no API key)</option>
+          <option value="hybrid">Rules + AI (needs GEMINI_API_KEY)</option>
+          <option value="llm">AI only</option>
+        </select>
+      </div>
+    </div>
+    <button class="primary" id="run">Clean the file</button>
+    <div id="runStatus"></div>
+  </section>
+
+  <section class="card hidden" id="review">
+    <h2>2. Review</h2>
+    <p id="summary"></p>
+    <div id="heldBox">
+      <p class="hint">These changes were held back. Tick the ones to apply.</p>
+      <table>
+        <thead><tr><th></th><th>Id</th><th>Change</th><th>Effect</th><th>Why held</th></tr></thead>
+        <tbody id="held"></tbody>
+      </table>
+    </div>
+    <div id="checkBox">
+      <p class="hint" style="margin-top:16px">Applied, but worth a look:</p>
+      <ul id="checks"></ul>
+    </div>
+    <p><a id="reportLink" target="_blank">Full report</a></p>
+    <label for="reviewer">Your name (goes in the audit log)</label>
+    <input type="text" id="reviewer" autocomplete="name">
+    <label for="note">Note (optional)</label>
+    <textarea id="note"></textarea>
+    <button class="primary" id="approve">Approve</button>
+    <button id="reject">Reject the run</button>
+    <div id="reviewStatus"></div>
+  </section>
+
+  <section class="card hidden" id="done">
+    <h2>3. Result</h2>
+    <p id="result"></p>
+    <p><a id="download" download>Download the clean CSV</a> · <a id="auditLink" target="_blank">Audit log</a></p>
+    <button id="again">Clean another file</button>
+  </section>
+</main>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  let token = "";
+  let current = null;
+
+  async function api(path, options = {}) {
+    options.headers = Object.assign({}, options.headers, token ? { Authorization: "Bearer " + token } : {});
+    let response = await fetch(path, options);
+    if (response.status === 401) {
+      token = window.prompt("This server needs its API token (MAPWRIGHT_API_TOKEN):") || "";
+      options.headers.Authorization = "Bearer " + token;
+      response = await fetch(path, options);
+    }
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || ("HTTP " + response.status));
+    return data;
+  }
+
+  function status(box, kind, text) {
+    box.replaceChildren();
+    if (!text) return;
+    const div = document.createElement("div");
+    div.className = "status " + kind;
+    div.textContent = text;
+    box.appendChild(div);
+  }
+
+  function cell(row, text) {
+    const td = document.createElement("td");
+    td.textContent = text;
+    row.appendChild(td);
+    return td;
+  }
+
+  function showReview(run) {
+    current = run;
+    $("summary").textContent = run.summary_text;
+    const held = $("held");
+    held.replaceChildren();
+    for (const h of run.held_actions) {
+      const tr = document.createElement("tr");
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.value = h.id;
+      cell(tr, "").appendChild(box);
+      cell(tr, h.id);
+      cell(tr, h.type + (h.targets.length ? " on " + h.targets.join(", ") : " on the whole table") + (h.why ? ". " + h.why : ""));
+      cell(tr, h.cells_changed + " cells" + (h.rows_removed ? ", " + h.rows_removed + " rows removed" : ""));
+      cell(tr, h.held_because || "");
+      held.appendChild(tr);
+    }
+    $("heldBox").classList.toggle("hidden", run.held_actions.length === 0);
+    const heldIds = new Set(run.held_ids);
+    const checks = $("checks");
+    checks.replaceChildren();
+    for (const item of run.needs_review) {
+      if (item.action && heldIds.has(item.action)) continue;
+      const li = document.createElement("li");
+      li.textContent = item.issue + " on " + item.target + (item.action ? " (applied by " + item.action + ")" : "");
+      checks.appendChild(li);
+    }
+    $("checkBox").classList.toggle("hidden", checks.children.length === 0);
+    $("reportLink").href = "/runs/" + run.id + "/report";
+    $("approve").textContent = run.held_actions.length ? "Approve the ticked changes" : "Approve";
+    $("review").classList.remove("hidden");
+    $("review").scrollIntoView({ behavior: "smooth" });
+  }
+
+  function showDone(run) {
+    $("result").textContent = run.summary_text;
+    $("download").href = "/runs/" + run.id + "/target.csv";
+    $("download").download = run.filename.replace(/\.csv$/i, "") + "-clean.csv";
+    $("auditLink").href = "/runs/" + run.id + "/audit";
+    $("download").parentElement.classList.toggle("hidden", run.status === "rejected");
+    $("done").classList.remove("hidden");
+    $("done").scrollIntoView({ behavior: "smooth" });
+  }
+
+  async function loadContracts() {
+    try {
+      const data = await api("/contracts");
+      for (const name of data.contracts) {
+        const option = document.createElement("option");
+        option.value = option.textContent = name;
+        $("contract").appendChild(option);
+      }
+    } catch (error) {
+      status($("runStatus"), "bad", error.message);
+    }
+  }
+
+  $("run").addEventListener("click", async () => {
+    const file = $("file").files[0];
+    if (!file) return status($("runStatus"), "warn", "Choose a CSV file first.");
+    $("run").disabled = true;
+    $("review").classList.add("hidden");
+    $("done").classList.add("hidden");
+    status($("runStatus"), "warn", "Working on it. Rules only takes seconds; with AI it can take a minute.");
+    try {
+      const query = new URLSearchParams({ contract: $("contract").value, system: $("system").value, filename: file.name });
+      const run = await api("/runs?" + query, { method: "POST", headers: { "Content-Type": "text/csv" }, body: file });
+      status($("runStatus"), "ok", "Done: " + run.rows + " rows.");
+      showReview(run);
+    } catch (error) {
+      status($("runStatus"), "bad", error.message);
+    } finally {
+      $("run").disabled = false;
+    }
+  });
+
+  async function review(decision) {
+    const reviewer = $("reviewer").value.trim();
+    if (!reviewer) return status($("reviewStatus"), "warn", "Add your name first.");
+    const approve = [...document.querySelectorAll("#held input:checked")].map((b) => b.value);
+    $("approve").disabled = $("reject").disabled = true;
+    try {
+      const run = await api("/runs/" + current.id + "/review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision, approve, reviewer, note: $("note").value }),
+      });
+      status($("reviewStatus"), decision === "reject" ? "bad" : "ok", decision === "reject" ? "Rejected." : "Approved.");
+      showDone(run);
+    } catch (error) {
+      status($("reviewStatus"), "bad", error.message);
+    } finally {
+      $("approve").disabled = $("reject").disabled = false;
+    }
+  }
+  $("approve").addEventListener("click", () => review("approve"));
+  $("reject").addEventListener("click", () => review("reject"));
+  $("again").addEventListener("click", () => {
+    $("file").value = "";
+    $("note").value = "";
+    for (const id of ["review", "done"]) $(id).classList.add("hidden");
+    status($("runStatus"), "", "");
+    status($("reviewStatus"), "", "");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  try { $("reviewer").value = localStorage.getItem("mapwright.reviewer") || ""; } catch (e) {}
+  $("reviewer").addEventListener("change", () => {
+    try { localStorage.setItem("mapwright.reviewer", $("reviewer").value); } catch (e) {}
+  });
+  loadContracts();
+})();
+</script>
+</body>
+</html>

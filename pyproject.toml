@@ -21,7 +21,7 @@ dev = [
 where = ["src"]
 
 [tool.setuptools.package-data]
-mapwright = ["policy.yaml", "rules/*.yaml"]
+mapwright = ["policy.yaml", "rules/*.yaml", "ui.html"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

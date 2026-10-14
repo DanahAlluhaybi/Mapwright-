@@ -45,6 +45,16 @@ on them.
 | Local API and n8n review workflow | `src/mapwright/server.py`, `n8n/` |
 | Design documents | `docs/` |
 
+## The quickest way to use it
+
+On Windows, after the setup below, double-click `start.bat`. It starts
+Mapwright and opens a page in your browser: upload a CSV, pick the target
+schema, tick the held changes you approve, and download the clean file.
+Close the black window to stop it. On macOS or Linux, run
+`python -m mapwright serve --open`.
+
+![The review page](docs/review-page.png)
+
 ## Getting started
 
 Requires Python 3.11 or newer.
@@ -103,7 +113,7 @@ what is held for approval.
 
 ## Running it from n8n
 
-`python -m mapwright serve` starts a small local API. The n8n workflow in
+`python -m mapwright serve` also starts a small local API. The n8n workflow in
 `n8n/mapwright-review.json` puts a form in front of it: upload a CSV, see
 what was held back, approve or reject, and the decision is written to the
 run's audit log with the reviewer's name. Setup and the API reference are

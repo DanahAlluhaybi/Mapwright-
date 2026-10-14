@@ -77,12 +77,13 @@ def main(argv: list[str] | None = None) -> int:
     check_cmd = commands.add_parser("llm-check", help="send one tiny request to Gemini")
     check_cmd.add_argument("--model", help="defaults to $MAPWRIGHT_MODEL or gemini-3.8-flash")
 
-    serve_cmd = commands.add_parser("serve", help="local HTTP API for n8n and other tools")
+    serve_cmd = commands.add_parser("serve", help="the upload page and local HTTP API")
     serve_cmd.add_argument("--host", default="127.0.0.1")
     serve_cmd.add_argument("--port", type=int, default=8765)
     serve_cmd.add_argument("--runs", type=Path, default=Path("runs/api"), help="where API runs are kept")
     serve_cmd.add_argument("--reference", type=load_reference, action="append", default=[])
     serve_cmd.add_argument("--model", help="model for hybrid/llm runs")
+    serve_cmd.add_argument("--open", action="store_true", help="open the page in the browser")
 
     args = parser.parse_args(argv)
     if args.command == "llm-check":
@@ -98,7 +99,7 @@ def main(argv: list[str] | None = None) -> int:
             model=args.model,
             token=os.environ.get("MAPWRIGHT_API_TOKEN") or None,
         )
-        serve(settings, args.host, args.port)
+        serve(settings, args.host, args.port, open_browser=args.open)
         return 0
     for path in [getattr(args, "source", None), getattr(args, "plan", None), args.contract]:
         if path is not None and not Path(path).is_file():

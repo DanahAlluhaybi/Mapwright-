@@ -68,6 +68,12 @@ class ServerTest(unittest.TestCase):
 
 
 class RunAndReviewTest(ServerTest):
+    def test_the_page(self):
+        status, body, content_type = self.client.call("GET", "/")
+        self.assertEqual(status, 200)
+        self.assertTrue(content_type.startswith("text/html"))
+        self.assertIn(b"<title>Mapwright</title>", body)
+
     def test_health_and_contracts(self):
         self.assertEqual(self.client.json("GET", "/health"), (200, {"ok": True}))
         status, data = self.client.json("GET", "/contracts")
@@ -210,6 +216,7 @@ class TokenTest(ServerTest):
         self.assertEqual(status, 401)
         wrong = Client(self.client.base, "nope")
         self.assertEqual(wrong.json("GET", "/health")[0], 401)
+        self.assertEqual(anonymous.call("GET", "/")[0], 200)  # the page itself holds no data
 
 
 if __name__ == "__main__":

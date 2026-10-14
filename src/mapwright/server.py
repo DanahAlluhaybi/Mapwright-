@@ -3,6 +3,7 @@ start a run, show it to a person and send back their decision.
 
     python -m mapwright serve                     http://127.0.0.1:8765
 
+    GET  /                          a page to upload, review and download, for people
     GET  /health                    is the server up
     GET  /contracts                 contract names that can be used
     POST /runs?contract=customer&system=rules&filename=export.csv
@@ -42,6 +43,7 @@ from .output import write_run, write_target
 from .pipeline import replay, run
 
 MAX_UPLOAD = 50 * 1024 * 1024
+UI_PAGE = Path(__file__).with_name("ui.html")
 RUN_ID = re.compile(r"^[0-9]{8}-[0-9]{6}-[0-9a-f]{6}$")
 NAME = re.compile(r"^[A-Za-z0-9_-]+$")
 SYSTEMS = ("rules", "hybrid", "llm")
@@ -210,7 +212,7 @@ class Service:
             {"issue": e.get("issue"), "target": e.get("target"), "action": e.get("action")} for e in result["escalations"]
         ]
         final_rows = approved_rows if approved_rows is not None else rows
-        text = f"{meta['filename']} ({meta['contract']}, {meta['system']}): {final_rows} rows, {meta['status']}. "
+        text = f"{meta['filename']} ({meta['contract']}, {meta['system']}): {final_rows} rows, {meta['status'].replace('_', ' ')}. "
         review = meta.get("review")
         if review is None:
             text += f"{_count(len(held), 'action')} held for approval, {_count(len(review_items), 'item')} to check."
@@ -373,10 +375,13 @@ def make_handler(service: Service):
 
         def _handle(self, method: str) -> None:
             try:
-                if not self._authorized():
-                    raise ApiError(HTTPStatus.UNAUTHORIZED, "missing or wrong API token")
                 url = urlparse(self.path)
                 parts = [p for p in url.path.split("/") if p]
+                if method == "GET" and not parts:
+                    # The page holds no data; every call it makes still needs the token.
+                    return self._send(HTTPStatus.OK, UI_PAGE.read_bytes(), "text/html; charset=utf-8")
+                if not self._authorized():
+                    raise ApiError(HTTPStatus.UNAUTHORIZED, "missing or wrong API token")
                 query = {k: v[-1] for k, v in parse_qs(url.query).items()}
                 self._route(method, parts, query)
             except ApiError as error:
@@ -429,9 +434,14 @@ def make_server(settings: Settings, host: str = "127.0.0.1", port: int = 8765) -
     return ThreadingHTTPServer((host, port), make_handler(Service(settings)))
 
 
-def serve(settings: Settings, host: str = "127.0.0.1", port: int = 8765) -> None:
+def serve(settings: Settings, host: str = "127.0.0.1", port: int = 8765, open_browser: bool = False) -> None:
     server = make_server(settings, host, port)
-    print(f"Mapwright API on http://{host}:{server.server_address[1]}  (runs in {settings.runs_dir})")
+    url = f"http://{host}:{server.server_address[1]}"
+    print(f"Mapwright on {url}  (runs in {settings.runs_dir}). Press Ctrl+C to stop.")
+    if open_browser:
+        import webbrowser
+
+        threading.Timer(0.5, webbrowser.open, [url]).start()
     if host not in ("127.0.0.1", "localhost") and not settings.token:
         print("Warning: listening beyond this machine without MAPWRIGHT_API_TOKEN set")
     try:
