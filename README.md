@@ -60,6 +60,13 @@ or must be unique, and list the values it may take. Saving makes a new
 schema under `contracts/custom/` (ignored by git); the built-in ones never
 change.
 
+**A free model on your own computer.** Instead of Gemini, the AI step can
+use a local model through [Ollama](https://ollama.com): no API key, no
+cost, and the data never leaves the machine. Install Ollama, run
+`ollama pull qwen2.5:7b` once, and pick it under **AI model** on the page
+(or pass `--model ollama/qwen2.5:7b` on the command line). Small local
+models are weaker than Gemini, so more changes end up waiting for review.
+
 To check a result yourself, clean one of the benchmark files on the page
 (for example `benchmark/datasets/D05/source.csv`), download the result and
 compare it with the known right answer:

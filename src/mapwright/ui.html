@@ -71,11 +71,16 @@
       <div>
         <label for="system">System</label>
         <select id="system">
-          <option value="rules">Rules only (no API key)</option>
-          <option value="hybrid">Rules + AI (needs GEMINI_API_KEY)</option>
-          <option value="llm">AI only</option>
+          <option value="rules">Rules only</option>
+          <option value="hybrid">Rules + AI (recommended)</option>
+          <option value="llm">AI only (for comparison)</option>
         </select>
       </div>
+    </div>
+    <div id="modelBox" class="hidden">
+      <label for="model">AI model</label>
+      <select id="model"></select>
+      <p class="hint" id="modelHint"></p>
     </div>
     <p class="hint" style="margin-top:8px"><a href="#" id="editRules">Change the rules for this schema</a></p>
     <div id="rulesBox" class="hidden">
@@ -222,6 +227,35 @@
     }
   }
 
+  async function loadModels() {
+    const select = $("model");
+    select.replaceChildren();
+    let data = { gemini: [], local: [], local_suggestion: "ollama/qwen2.5:7b" };
+    try { data = await api("/models"); } catch (error) { /* keep the empty list */ }
+    for (const name of data.local) {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name.replace("ollama/", "") + " (on this computer, free, data stays here)";
+      select.appendChild(option);
+    }
+    for (const name of data.gemini) {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name + " (Google, needs GEMINI_API_KEY, data is sent to Google)";
+      select.appendChild(option);
+    }
+    $("modelHint").textContent = data.local.length
+      ? ""
+      : "No local model found. For a free model on this computer, install Ollama from ollama.com and run: ollama pull "
+        + data.local_suggestion.replace("ollama/", "") + ", then reload this page.";
+  }
+
+  $("system").addEventListener("change", () => {
+    const usesModel = $("system").value !== "rules";
+    $("modelBox").classList.toggle("hidden", !usesModel);
+    if (usesModel) loadModels();
+  });
+
   let rulesFor = null;
   async function showRules() {
     const name = $("contract").value;
@@ -305,10 +339,13 @@
     $("run").disabled = true;
     $("review").classList.add("hidden");
     $("done").classList.add("hidden");
-    status($("runStatus"), "warn", "Working on it. Rules only takes seconds; with AI it can take a minute.");
+    status($("runStatus"), "warn", $("system").value === "rules"
+      ? "Working on it."
+      : "Working on it. With AI this can take a few minutes, longer with a local model.");
     try {
       const query = new URLSearchParams({ contract: $("contract").value, system: $("system").value, filename: file.name });
       if (/\.xls[xm]$/i.test(file.name) && $("sheet").value.trim()) query.set("sheet", $("sheet").value.trim());
+      if ($("system").value !== "rules" && $("model").value) query.set("model", $("model").value);
       const run = await api("/runs?" + query, { method: "POST", headers: { "Content-Type": "text/csv" }, body: file });
       status($("runStatus"), "ok", "Done: " + run.rows + " rows.");
       showReview(run);

@@ -6,10 +6,11 @@ start a run, show it to a person and send back their decision.
     GET  /                          a page to upload, review and download, for people
     GET  /health                    is the server up
     GET  /contracts                 contract names that can be used
+    GET  /models                    the Gemini model and the local Ollama models installed
     GET  /contracts/<name>          a schema's fields and rules
     POST /contracts                 JSON {"name", "base", "fields": {field: {"required", "unique",
                                     "allowed_values"}}}: save a copy with changed rules
-    POST /runs?contract=customer&system=rules&filename=export.csv[&sheet=Sheet1]
+    POST /runs?contract=customer&system=rules&filename=export.csv[&sheet=Sheet1][&model=ollama/qwen2.5:7b]
                                     body: the raw CSV or Excel (.xlsx) file
     POST /runs                      JSON {"source_path", "contract", "system"}: a file on this machine
     GET  /runs                      recent runs
@@ -88,12 +89,12 @@ class Settings:
     session_factory: object = None  # callable(system) -> LLMSession; tests replace it
 
 
-def _default_session(settings: Settings):
+def _default_session(settings: Settings, model: str | None = None):
     from .llm import CachedProvider
-    from .llm.gemini import GeminiProvider
+    from .llm import make_provider
     from .llmplan import LLMSession
 
-    return LLMSession(CachedProvider(settings.cache_dir, GeminiProvider(settings.model)))
+    return LLMSession(CachedProvider(settings.cache_dir, make_provider(model or settings.model)))
 
 
 class Service:
@@ -121,6 +122,18 @@ class Service:
             if path.is_file():
                 return path
         raise ApiError(HTTPStatus.BAD_REQUEST, f"unknown contract {name!r}; known: {', '.join(self.contracts())}")
+
+    def models(self) -> dict:
+        from .llm.gemini import default_model
+        from .llm.ollama import DEFAULT_MODEL, installed_models
+
+        local = installed_models()
+        return {
+            "default": self.settings.model or default_model(),
+            "gemini": [self.settings.model or default_model()] if not (self.settings.model or "").startswith("ollama/") else [],
+            "local": local,
+            "local_suggestion": DEFAULT_MODEL,
+        }
 
     def builtin_contracts(self) -> list[str]:
         return sorted(p.stem for p in self.settings.contracts_dir.glob("*.yaml"))
@@ -229,7 +242,13 @@ class Service:
     # Runs ------------------------------------------------------------------
 
     def start(
-        self, data: bytes, contract_name: str, system: str = "rules", filename: str = "source.csv", sheet: str | None = None
+        self,
+        data: bytes,
+        contract_name: str,
+        system: str = "rules",
+        filename: str = "source.csv",
+        sheet: str | None = None,
+        model: str | None = None,
     ) -> dict:
         if system not in SYSTEMS:
             raise ApiError(HTTPStatus.BAD_REQUEST, f"system must be one of {', '.join(SYSTEMS)}")
@@ -247,7 +266,7 @@ class Service:
 
         session = None
         if system != "rules":
-            factory = self.settings.session_factory or (lambda _system: _default_session(self.settings))
+            factory = self.settings.session_factory or (lambda _system: _default_session(self.settings, model))
             try:
                 session = factory(system)
             except Exception as error:  # missing key, unknown model
@@ -275,6 +294,7 @@ class Service:
             "sheet": sheet,
             "contract": contract_name,
             "system": system,
+            "model": session.model if session is not None else None,
             "status": "awaiting_review",
             "review": None,
         }
@@ -502,6 +522,8 @@ def make_handler(service: Service):
         def _route(self, method: str, parts: list[str], query: dict) -> None:
             if method == "GET" and parts == ["health"]:
                 return self._json(HTTPStatus.OK, {"ok": True})
+            if method == "GET" and parts == ["models"]:
+                return self._json(HTTPStatus.OK, service.models())
             if parts == ["contracts"]:
                 if method == "GET":
                     return self._json(HTTPStatus.OK, {"contracts": service.contracts()})
@@ -515,7 +537,12 @@ def make_handler(service: Service):
                     body = self._json_body()
                     path = service.local_source(str(body.get("source_path", "")))
                     summary = service.start(
-                        path.read_bytes(), str(body.get("contract", "")), body.get("system", "rules"), path.name
+                        path.read_bytes(),
+                        str(body.get("contract", "")),
+                        body.get("system", "rules"),
+                        path.name,
+                        body.get("sheet") or None,
+                        body.get("model") or None,
                     )
                 else:
                     summary = service.start(
@@ -524,6 +551,7 @@ def make_handler(service: Service):
                         query.get("system", "rules"),
                         query.get("filename", "source.csv"),
                         query.get("sheet") or None,
+                        query.get("model") or None,
                     )
                 return self._json(HTTPStatus.CREATED, summary)
             if len(parts) == 2 and parts[0] == "runs" and method == "GET":

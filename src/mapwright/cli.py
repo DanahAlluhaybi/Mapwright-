@@ -32,10 +32,10 @@ def load_reference(spec: str) -> tuple[str, frozenset[str]]:
 
 def llm_check(model: str | None) -> int:
     from .llm import LLMError, LLMRequest
-    from .llm.gemini import GeminiProvider
+    from .llm import make_provider
 
     try:
-        provider = GeminiProvider(model)
+        provider = make_provider(model)
         response = provider.complete(
             LLMRequest(prompt='Reply with the JSON object {"ok": true} and nothing else.', model=provider.model)
         )
@@ -111,11 +111,11 @@ def main(argv: list[str] | None = None) -> int:
         session = None
         if args.system != "rules":
             from .llm import CachedProvider, LLMError
-            from .llm.gemini import GeminiProvider
+            from .llm import make_provider
             from .llmplan import LLMSession
 
             try:
-                session = LLMSession(CachedProvider(Path("llm_cache"), GeminiProvider(args.model)))
+                session = LLMSession(CachedProvider(Path("llm_cache"), make_provider(args.model)))
             except LLMError as error:
                 print(error)
                 return 1

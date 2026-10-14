@@ -126,10 +126,11 @@ class LLMSettings:
     def provider(cls):
         """One provider per process, so request spacing holds across cases."""
         if cls._provider is None:
-            from mapwright.llm.gemini import GeminiProvider, default_model
+            from mapwright.llm import make_provider
+            from mapwright.llm.gemini import default_model
 
             if cls.record:
-                cls._provider = CachedProvider(LLM_CACHE, GeminiProvider(cls.model or None))
+                cls._provider = CachedProvider(LLM_CACHE, make_provider(cls.model or None))
             else:
                 cls._provider = CachedProvider(LLM_CACHE, model=cls.model or default_model())
         return cls._provider
